@@ -1,0 +1,16 @@
+# Worktrees
+.worktrees/
+
+# Superpowers brainstorm artifacts
+.superpowers/
+
+# Tauri build outputs
+src-tauri/target/
+
+# Node
+node_modules/
+dist/
+
+# Environment
+.env
+.env.local
