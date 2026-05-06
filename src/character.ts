@@ -22,6 +22,8 @@ export function initCharacter(canvasEl: HTMLCanvasElement) {
 
 export function setState(state: SpriteName) {
   currentSprite = state;
+  // idle 상태일 때만 bob 애니메이션 적용
+  canvas.classList.toggle('idle', state === 'idle');
 }
 
 export function getState(): SpriteName {
