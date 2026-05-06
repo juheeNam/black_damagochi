@@ -1,5 +1,3 @@
-// Gauge bar rendering
-
 function colorFor(pct: number): string {
   if (pct > 60) return '#4caf50';
   if (pct > 30) return '#ff9800';
@@ -13,14 +11,11 @@ function updateBar(barEl: HTMLElement, value: number) {
 }
 
 let moodBar: HTMLElement;
-let hungerBar: HTMLElement;
 
-export function initGauge(mood: HTMLElement, hunger: HTMLElement) {
-  moodBar   = mood;
-  hungerBar = hunger;
+export function initGauge(mood: HTMLElement) {
+  moodBar = mood;
 }
 
-export function updateGauge(mood: number, hunger: number) {
-  updateBar(moodBar,   mood);
-  updateBar(hungerBar, hunger);
+export function updateGauge(mood: number) {
+  updateBar(moodBar, mood);
 }

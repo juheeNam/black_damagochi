@@ -17,7 +17,7 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  cursor: move;
+  cursor: default;
 }
 
 #sprite {
@@ -71,7 +71,7 @@ body {
   display: none;
 }
 
-/* 게이지: 평소에 숨김, 호버 시 표시 */
+/* 게이지: 평소에 숨김, 스프라이트 호버 시에만 표시 */
 .gauges {
   display: flex;
   flex-direction: column;
@@ -82,7 +82,7 @@ body {
   pointer-events: none;
 }
 
-#app:hover .gauges {
+#sprite:hover ~ .gauges {
   opacity: 1;
 }
 

@@ -1,14 +1,17 @@
-// User interaction handlers
-
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { setState, renderFrame } from './character';
-import { adjustMood, feed } from './stats';
+import { adjustMood, getStats } from './stats';
 import { showBubble } from './bubble';
 
 const HURT_MESSAGES = ['(x_x)', '아파!!', '하지마!', '(>_<)!!', '그만해!'];
-const FEED_MESSAGES = ['(^q^) ♪', '냠냠~', '맛있다!'];
+const FEED_MESSAGES = ['(^q^) ♪', '기분 좋아~!', '♥ 충전!'];
 
 let clickCooldown = false;
+
+function resolveIdle() {
+  const { mood } = getStats();
+  setState(mood <= 30 ? 'angry' : 'idle');
+}
 
 export function initInteractions(spriteEl: HTMLElement) {
   let isDragging = false;
@@ -25,15 +28,30 @@ export function initInteractions(spriteEl: HTMLElement) {
       const dy = me.clientY - startY;
       if (!isDragging && Math.sqrt(dx * dx + dy * dy) > 6) {
         isDragging = true;
+        const dragStartTime = Date.now();
         setState('dizzy');
-        renderFrame(); // dizzy 스프라이트 즉시 렌더
+        renderFrame();
         cleanup();
-        // 한 프레임 대기 후 드래그 시작 (dizzy가 화면에 그려진 뒤)
-        requestAnimationFrame(() => {
-          getCurrentWindow().startDragging().then(() => {
-            setState('idle');
+
+        const onDragEnd = () => {
+          document.removeEventListener('pointerup', onDragEnd);
+          document.removeEventListener('pointercancel', onDragEnd);
+          const duration = Date.now() - dragStartTime;
+          isDragging = false;
+          if (duration >= 3000) {
+            setState('angry');
             renderFrame();
-          });
+            setTimeout(() => resolveIdle(), 1200);
+          } else {
+            resolveIdle();
+            renderFrame();
+          }
+        };
+        document.addEventListener('pointerup', onDragEnd);
+        document.addEventListener('pointercancel', onDragEnd);
+
+        requestAnimationFrame(() => {
+          getCurrentWindow().startDragging();
         });
       }
     };
@@ -48,13 +66,11 @@ export function initInteractions(spriteEl: HTMLElement) {
     document.addEventListener('mouseup', onUp);
   });
 
-  // 클릭: 드래그였으면 무시
   spriteEl.addEventListener('click', (e: MouseEvent) => {
     if (isDragging) { isDragging = false; return; }
     handleClick(e);
   });
 
-  // 우클릭: 밥 주기
   spriteEl.addEventListener('contextmenu', handleFeed);
 }
 
@@ -67,14 +83,13 @@ function handleClick(e: MouseEvent) {
   setState('hit');
   adjustMood(-3);
   showBubble(HURT_MESSAGES[Math.floor(Math.random() * HURT_MESSAGES.length)]);
-  setTimeout(() => setState('idle'), 600);
+  setTimeout(() => resolveIdle(), 600);
 }
 
 function handleFeed(e: MouseEvent) {
   e.preventDefault();
-  feed(30);
-  adjustMood(3);
+  adjustMood(30);
   setState('hit');
   showBubble(FEED_MESSAGES[Math.floor(Math.random() * FEED_MESSAGES.length)]);
-  setTimeout(() => setState('idle'), 800);
+  setTimeout(() => resolveIdle(), 800);
 }
