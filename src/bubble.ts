@@ -1,2 +1,26 @@
 // Speech bubble rendering
-export {};
+
+let el: HTMLElement;
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+export function initBubble(element: HTMLElement) {
+  el = element;
+}
+
+export function showBubble(text: string, durationMs = 2500) {
+  if (hideTimer) clearTimeout(hideTimer);
+  el.textContent = text;
+  el.classList.remove('hidden');
+  hideTimer = setTimeout(() => {
+    el.classList.add('hidden');
+    hideTimer = null;
+  }, durationMs);
+}
+
+export function hideBubble() {
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+  el.classList.add('hidden');
+}
