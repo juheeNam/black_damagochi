@@ -15,7 +15,7 @@ export function initCharacter(canvasEl: HTMLCanvasElement) {
 
   for (const name of SPRITE_NAMES) {
     const img = new Image();
-    img.src = `/src/assets/sprites/${name}.png`;
+    img.src = `/sprites/${name}.png`;
     sprites[name] = img;
   }
 }
