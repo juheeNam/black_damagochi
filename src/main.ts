@@ -22,7 +22,7 @@ async function main() {
   initBubble(bubbleEl);
   initGauge(moodBar, hungerBar);
   initInteractions(canvas);
-  initDrag(canvas);
+  initDrag(document.getElementById('app') as HTMLElement, canvas);
 
   const stats = await loadStats();
   updateGauge(stats.mood, stats.hunger);
