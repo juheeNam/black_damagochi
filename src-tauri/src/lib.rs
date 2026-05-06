@@ -8,6 +8,11 @@ use tauri::{
 };
 use tauri_plugin_autostart::ManagerExt;
 
+#[tauri::command]
+fn quit(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -17,6 +22,7 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
+        .invoke_handler(tauri::generate_handler![quit])
         .setup(|app| {
             let is_enabled = app.autolaunch().is_enabled().unwrap_or(false);
 
@@ -26,8 +32,7 @@ pub fn run() {
             let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&autostart, &quit])?;
 
-            TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
+            let mut tray = TrayIconBuilder::new()
                 .menu(&menu)
                 .tooltip("Black Damagochi")
                 .on_menu_event(|app, event| match event.id.as_ref() {
@@ -55,8 +60,13 @@ pub fn run() {
                             let _ = window.set_focus();
                         }
                     }
-                })
-                .build(app)?;
+                });
+
+            if let Some(icon) = app.default_window_icon() {
+                tray = tray.icon(icon.clone());
+            }
+
+            tray.build(app)?;
 
             Ok(())
         })
