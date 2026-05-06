@@ -1,11 +1,79 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
   background: transparent;
   overflow: hidden;
   user-select: none;
   cursor: default;
+  width: 200px;
+  height: 240px;
 }
-img.sprite {
+
+#app {
+  width: 200px;
+  height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+#sprite {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+  width: 80px;
+  height: 80px;
+  cursor: grab;
+}
+
+#sprite:active {
+  cursor: grabbing;
+}
+
+.bubble {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 2px solid #222;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #222;
+}
+
+.bubble.hidden {
+  display: none;
+}
+
+#gauge-wrap {
+  width: 80px;
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+#gauge-bar {
+  height: 100%;
+  width: 100%;
+  background: #4caf50;
+  border-radius: 4px;
+  transition: width 0.5s ease, background-color 0.5s ease;
 }
