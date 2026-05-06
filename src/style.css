@@ -17,6 +17,7 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
+  cursor: default;
 }
 
 #sprite {
@@ -29,6 +30,15 @@ body {
 
 #sprite:active {
   cursor: grabbing;
+}
+
+#sprite.idle {
+  animation: bob 2s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
 }
 
 .bubble {
@@ -61,19 +71,44 @@ body {
   display: none;
 }
 
-#gauge-wrap {
-  width: 80px;
-  height: 8px;
+/* 게이지: 평소에 숨김, 스프라이트 호버 시에만 표시 */
+.gauges {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+#sprite:hover ~ .gauges {
+  opacity: 1;
+}
+
+.gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.gauge-label {
+  font-size: 11px;
+  width: 16px;
+  text-align: center;
+}
+
+.gauge-wrap {
+  width: 64px;
+  height: 7px;
   background: #333;
   border-radius: 4px;
-  margin-top: 10px;
   overflow: hidden;
 }
 
-#gauge-bar {
+.gauge-bar {
   height: 100%;
   width: 100%;
-  background: #4caf50;
   border-radius: 4px;
   transition: width 0.5s ease, background-color 0.5s ease;
 }

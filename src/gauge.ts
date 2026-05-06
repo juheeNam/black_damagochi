@@ -1,19 +1,21 @@
-// Stress/mood gauge rendering
-
-let barEl: HTMLElement;
-
-export function initGauge(bar: HTMLElement) {
-  barEl = bar;
+function colorFor(pct: number): string {
+  if (pct > 60) return '#4caf50';
+  if (pct > 30) return '#ff9800';
+  return '#f44336';
 }
 
-export function updateGauge(value: number) {
+function updateBar(barEl: HTMLElement, value: number) {
   const pct = Math.max(0, Math.min(100, value));
   barEl.style.width = `${pct}%`;
-  if (pct > 60) {
-    barEl.style.backgroundColor = '#4caf50';
-  } else if (pct > 30) {
-    barEl.style.backgroundColor = '#ff9800';
-  } else {
-    barEl.style.backgroundColor = '#f44336';
-  }
+  barEl.style.backgroundColor = colorFor(pct);
+}
+
+let moodBar: HTMLElement;
+
+export function initGauge(mood: HTMLElement) {
+  moodBar = mood;
+}
+
+export function updateGauge(mood: number) {
+  updateBar(moodBar, mood);
 }

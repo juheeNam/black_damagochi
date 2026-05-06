@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
+  "productName": "black-damagochi",
   "version": "0.1.0",
   "identifier": "com.blackdamagochi.app",
   "build": {
@@ -19,6 +19,7 @@
         "resizable": false,
         "decorations": false,
         "transparent": true,
+        "shadow": false,
         "alwaysOnTop": true,
         "skipTaskbar": true
       }
