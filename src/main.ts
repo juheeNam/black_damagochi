@@ -1,4 +1,5 @@
 import './style.css';
+import { invoke } from '@tauri-apps/api/core';
 import { initCharacter, renderFrame, setState, getState } from './character';
 import { loadStats, persistStats, tickDecay, getStats } from './stats';
 import { initBubble, showBubble } from './bubble';
@@ -23,6 +24,10 @@ async function main() {
   initBubble(bubbleEl);
   initGauge(moodBar);
   initInteractions(canvas);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') invoke('quit');
+  });
 
   const stats = await loadStats();
   updateGauge(stats.mood);
