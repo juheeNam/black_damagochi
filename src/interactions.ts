@@ -73,6 +73,7 @@ export function initInteractions(spriteEl: HTMLElement) {
         let moveTimeout: ReturnType<typeof setTimeout> | null = null;
         let unlistenMove: (() => void) | null = null;
         let onPostDragMouseMove: (() => void) | null = null;
+        let dragStarted = false;
 
         const endDrag = () => {
           if (ended) return;
@@ -101,16 +102,18 @@ export function initInteractions(spriteEl: HTMLElement) {
 
         requestAnimationFrame(async () => {
           const win = getCurrentWindow();
-          // onMoved 구독을 startDragging 전에 완료해야 첫 move 이벤트를 놓치지 않음
           unlistenMove = await win.onMoved(() => {
+            // 창이 실제로 움직이기 시작한 뒤에만 mousemove fallback 등록
+            // (startDragging 직후 잔여 mousemove 이벤트를 잡지 않기 위해)
+            if (!dragStarted) {
+              dragStarted = true;
+              onPostDragMouseMove = () => endDrag();
+              document.addEventListener('mousemove', onPostDragMouseMove, { once: true });
+            }
             if (moveTimeout !== null) clearTimeout(moveTimeout);
             moveTimeout = setTimeout(endDrag, 200);
           });
           win.startDragging();
-          // OS drag 중에는 mousemove가 webview에 오지 않으므로,
-          // 드랍 후 첫 mousemove가 감지되면 drag 종료로 판단
-          onPostDragMouseMove = () => endDrag();
-          document.addEventListener('mousemove', onPostDragMouseMove, { once: true });
         });
       }
     };
