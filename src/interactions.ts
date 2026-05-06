@@ -33,9 +33,17 @@ export function initInteractions(spriteEl: HTMLElement) {
         renderFrame();
         cleanup();
 
-        const onDragEnd = () => {
-          document.removeEventListener('pointerup', onDragEnd);
-          document.removeEventListener('pointercancel', onDragEnd);
+        let ended = false;
+        let moveTimeout: ReturnType<typeof setTimeout> | null = null;
+        let unlistenMove: (() => void) | null = null;
+
+        const endDrag = () => {
+          if (ended) return;
+          ended = true;
+          if (moveTimeout !== null) clearTimeout(moveTimeout);
+          if (unlistenMove) unlistenMove();
+          document.removeEventListener('pointerup', onPointerUp);
+          document.removeEventListener('pointercancel', onPointerUp);
           const duration = Date.now() - dragStartTime;
           isDragging = false;
           if (duration >= 3000) {
@@ -47,11 +55,22 @@ export function initInteractions(spriteEl: HTMLElement) {
             renderFrame();
           }
         };
-        document.addEventListener('pointerup', onDragEnd);
-        document.addEventListener('pointercancel', onDragEnd);
+
+        // fallback: pointerup (창이 이동하지 않고 드랍된 경우)
+        const onPointerUp = () => endDrag();
+        document.addEventListener('pointerup', onPointerUp);
+        document.addEventListener('pointercancel', onPointerUp);
 
         requestAnimationFrame(() => {
-          getCurrentWindow().startDragging();
+          const win = getCurrentWindow();
+          // onMoved: 창 이동이 멈춘 후 150ms → 드래그 종료로 판단
+          win.onMoved(() => {
+            if (moveTimeout !== null) clearTimeout(moveTimeout);
+            moveTimeout = setTimeout(endDrag, 150);
+          }).then(unlisten => {
+            unlistenMove = unlisten;
+          });
+          win.startDragging();
         });
       }
     };
