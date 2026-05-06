@@ -1,12 +1,12 @@
 // User interaction handlers
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { setState } from './character';
+import { setState, renderFrame } from './character';
 import { adjustMood, feed } from './stats';
 import { showBubble } from './bubble';
 
-const HURT_MESSAGES = ['(x_x)', 'イタイ！', 'ﾔﾒﾃ！', '(>_<)!!', 'ﾀﾀクナ！'];
-const FEED_MESSAGES = ['(^q^) ♪', 'ｶｺウｶｺウ', '(*´ҳ`*)'];
+const HURT_MESSAGES = ['(x_x)', '아파!!', '하지마!', '(>_<)!!', '그만해!'];
+const FEED_MESSAGES = ['(^q^) ♪', '냠냠~', '맛있다!'];
 
 let clickCooldown = false;
 
@@ -14,7 +14,6 @@ export function initInteractions(spriteEl: HTMLElement) {
   let isDragging = false;
   let startX = 0, startY = 0;
 
-  // 마우스 누를 때: 드래그 vs 클릭 판별
   spriteEl.addEventListener('mousedown', (e: MouseEvent) => {
     if (e.button !== 0) return;
     isDragging = false;
@@ -27,11 +26,15 @@ export function initInteractions(spriteEl: HTMLElement) {
       if (!isDragging && Math.sqrt(dx * dx + dy * dy) > 6) {
         isDragging = true;
         setState('dizzy');
-        // 드래그 완료 후 idle 복귀
-        getCurrentWindow().startDragging().then(() => {
-          setState('idle');
-        });
+        renderFrame(); // dizzy 스프라이트 즉시 렌더
         cleanup();
+        // 한 프레임 대기 후 드래그 시작 (dizzy가 화면에 그려진 뒤)
+        requestAnimationFrame(() => {
+          getCurrentWindow().startDragging().then(() => {
+            setState('idle');
+            renderFrame();
+          });
+        });
       }
     };
 

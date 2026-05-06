@@ -2,7 +2,6 @@ import './style.css';
 import { initCharacter, renderFrame, setState } from './character';
 import { loadStats, persistStats, tickDecay, getStats } from './stats';
 import { initBubble, showBubble } from './bubble';
-import { initDrag } from './drag';
 import { initGauge, updateGauge } from './gauge';
 import { initInteractions } from './interactions';
 
@@ -22,7 +21,6 @@ async function main() {
   initBubble(bubbleEl);
   initGauge(moodBar, hungerBar);
   initInteractions(canvas);
-  initDrag(document.getElementById('app') as HTMLElement, canvas);
 
   const stats = await loadStats();
   updateGauge(stats.mood, stats.hunger);
