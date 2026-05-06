@@ -72,15 +72,12 @@ export function initInteractions(spriteEl: HTMLElement) {
         let ended = false;
         let moveTimeout: ReturnType<typeof setTimeout> | null = null;
         let unlistenMove: (() => void) | null = null;
-        let onPostDragMouseMove: (() => void) | null = null;
-        let dragStarted = false;
 
         const endDrag = () => {
           if (ended) return;
           ended = true;
           if (moveTimeout !== null) clearTimeout(moveTimeout);
           if (unlistenMove) unlistenMove();
-          if (onPostDragMouseMove) document.removeEventListener('mousemove', onPostDragMouseMove);
           document.removeEventListener('pointerup', onPointerUp);
           document.removeEventListener('pointercancel', onPointerUp);
           const duration = Date.now() - dragStartTime;
@@ -103,15 +100,8 @@ export function initInteractions(spriteEl: HTMLElement) {
         requestAnimationFrame(async () => {
           const win = getCurrentWindow();
           unlistenMove = await win.onMoved(() => {
-            // 창이 실제로 움직이기 시작한 뒤에만 mousemove fallback 등록
-            // (startDragging 직후 잔여 mousemove 이벤트를 잡지 않기 위해)
-            if (!dragStarted) {
-              dragStarted = true;
-              onPostDragMouseMove = () => endDrag();
-              document.addEventListener('mousemove', onPostDragMouseMove, { once: true });
-            }
             if (moveTimeout !== null) clearTimeout(moveTimeout);
-            moveTimeout = setTimeout(endDrag, 200);
+            moveTimeout = setTimeout(endDrag, 500);
           });
           win.startDragging();
         });
