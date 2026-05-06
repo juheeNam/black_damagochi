@@ -1,7 +1,50 @@
-# Tauri + Vanilla TS
+# Black Damagochi 🖤
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Typescript.
+바탕화면 위를 돌아다니는 픽셀 아트 데스크탑 펫
 
-## Recommended IDE Setup
+---
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## 조작법
+
+| 동작 | 효과 |
+|------|------|
+| **캐릭터 클릭** | 아파합니다 (기분 ↓) |
+| **캐릭터 우클릭** | 하트를 충전해줍니다 (기분 ↑) |
+| **캐릭터 드래그** | 창을 이동합니다. 어지러워해요 |
+| **3초 이상 드래그 후 드랍** | 화를 냅니다 |
+| **Escape** | 앱 종료 |
+
+## 상태
+
+| 상태 | 조건 |
+|------|------|
+| 기본 (idle) | 평소. 위아래로 둥실거려요 |
+| 어지러움 (dizzy) | 드래그 중 |
+| 맞음 (hit) | 클릭 / 우클릭 직후 |
+| 화남 (angry) | 기분이 30 이하이거나 오래 흔든 뒤 |
+| 축 처짐 (down) | 기분이 매우 낮을 때 |
+
+## 기분 게이지 (♥)
+
+캐릭터 위에 마우스를 올리면 하트 게이지가 표시됩니다.
+
+- 🟢 초록 — 기분 좋음
+- 🟠 주황 — 기분 보통
+- 🔴 빨강 — 기분 나쁨 (화난 상태로 전환)
+
+기분은 시간이 지나면 자동으로 조금씩 떨어지니, 가끔 우클릭으로 충전해주세요.
+
+## 시스템 트레이
+
+작업표시줄 우측 하단 트레이 아이콘을 우클릭하면:
+
+- **자동 시작** — PC 켤 때 자동으로 실행
+- **종료** — 앱 종료
+
+> 트레이 아이콘이 안 보이면 `^` 버튼을 눌러 숨겨진 아이콘 영역을 확인하세요.
+
+---
+
+## 설치
+
+[Releases](https://github.com/juheeNam/black_damagochi/releases) 페이지에서 `black-damagochi_x.x.x_x64-setup.exe` 를 다운받아 실행하세요.
