@@ -72,12 +72,14 @@ export function initInteractions(spriteEl: HTMLElement) {
         let ended = false;
         let moveTimeout: ReturnType<typeof setTimeout> | null = null;
         let unlistenMove: (() => void) | null = null;
+        let onPostDragMouseMove: (() => void) | null = null;
 
         const endDrag = () => {
           if (ended) return;
           ended = true;
           if (moveTimeout !== null) clearTimeout(moveTimeout);
           if (unlistenMove) unlistenMove();
+          if (onPostDragMouseMove) document.removeEventListener('mousemove', onPostDragMouseMove);
           document.removeEventListener('pointerup', onPointerUp);
           document.removeEventListener('pointercancel', onPointerUp);
           const duration = Date.now() - dragStartTime;
@@ -97,15 +99,18 @@ export function initInteractions(spriteEl: HTMLElement) {
         document.addEventListener('pointerup', onPointerUp);
         document.addEventListener('pointercancel', onPointerUp);
 
-        requestAnimationFrame(() => {
+        requestAnimationFrame(async () => {
           const win = getCurrentWindow();
-          win.onMoved(() => {
+          // onMoved 구독을 startDragging 전에 완료해야 첫 move 이벤트를 놓치지 않음
+          unlistenMove = await win.onMoved(() => {
             if (moveTimeout !== null) clearTimeout(moveTimeout);
-            moveTimeout = setTimeout(endDrag, 150);
-          }).then(unlisten => {
-            unlistenMove = unlisten;
+            moveTimeout = setTimeout(endDrag, 200);
           });
           win.startDragging();
+          // OS drag 중에는 mousemove가 webview에 오지 않으므로,
+          // 드랍 후 첫 mousemove가 감지되면 drag 종료로 판단
+          onPostDragMouseMove = () => endDrag();
+          document.addEventListener('mousemove', onPostDragMouseMove, { once: true });
         });
       }
     };
