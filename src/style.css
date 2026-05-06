@@ -1,0 +1,11 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
+img.sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
