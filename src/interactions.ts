@@ -5,7 +5,7 @@ import { adjustMood, getStats } from './stats';
 import { showBubble } from './bubble';
 
 const PET_MESSAGES = ['(^▽^) ♪', '(*^_^*)', '~(^.^~)', '(＾▽＾)'];
-const DIZZY_MESSAGES = ['(・・;)', '(´；ω；｀)', '...'];
+const DIZZY_MESSAGES = ['(・・;)', '(´；ω；`)', '...'];
 const ANGRY_MESSAGES = ['(╬ಠ益ಠ)', '(#`Д´)', '！！！'];
 
 let clickCooldown = false;
