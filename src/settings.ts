@@ -74,7 +74,15 @@ function applyOpacity(preset: OpacityPreset) {
 function applyDnd(enabled: boolean) {
   currentDnd = enabled;
   document.getElementById('app')?.classList.toggle('dnd-active', enabled);
-  document.getElementById('sprite')?.classList.toggle('dnd-mode', enabled);
+  const sprite = document.getElementById('sprite');
+  if (sprite) {
+    sprite.classList.toggle('dnd-mode', enabled);
+    if (!enabled) {
+      sprite.style.animation = 'none';
+      void sprite.offsetHeight;
+      sprite.style.animation = '';
+    }
+  }
   setBubbleDnd(enabled);
 }
 

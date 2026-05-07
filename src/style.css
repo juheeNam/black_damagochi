@@ -398,21 +398,23 @@ body {
   display: none;
   width: 36px;
   height: 36px;
-  background: rgba(20, 20, 20, 0.92);
-  border: 2px solid #666;
+  background: rgba(240, 240, 240, 0.92);
+  border: 2px solid #999;
   border-radius: 50%;
-  font-size: 18px;
+  font-size: 16px;
+  color: #333;
   cursor: pointer;
   position: absolute;
   top: 2px;
   left: 2px;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 
 #mini-restore-btn:hover {
-  border-color: #aaa;
+  background: rgba(255, 255, 255, 1);
+  border-color: #555;
 }
 
 /* 미니 모드 시 캐릭터/패널 숨기고 복귀 버튼만 표시 */

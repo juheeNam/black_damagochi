@@ -7,6 +7,7 @@ import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
 import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb } from './settings';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
 import { QUEST_LIST, startQuest, collectQuest, cancelQuest, getProgress, isComplete, formatRemaining, getQuestDef } from './quests';
@@ -157,7 +158,11 @@ async function main() {
   });
 
   document.getElementById('hide-btn')!.addEventListener('click', () => toggleMini());
-  document.getElementById('mini-restore-btn')!.addEventListener('click', () => toggleMini());
+  const miniRestoreBtn = document.getElementById('mini-restore-btn')!;
+  miniRestoreBtn.addEventListener('click', () => toggleMini());
+  miniRestoreBtn.addEventListener('mousedown', (e) => {
+    if (e.button === 0) getCurrentWindow().startDragging();
+  });
   const dndBtn = document.getElementById('dnd-btn')!;
   dndBtn.addEventListener('click', async () => {
     await toggleDoNotDisturb();
