@@ -9,6 +9,24 @@
   </head>
   <body>
     <div id="app">
+      <button id="settings-btn" title="설정">⚙</button>
+      <div id="settings-panel" class="hidden">
+        <div class="settings-row">
+          <span class="settings-label">크기</span>
+          <button data-size="small">S</button>
+          <button data-size="medium">M</button>
+          <button data-size="large">L</button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">투명</span>
+          <button data-opacity="low">낮음</button>
+          <button data-opacity="normal">보통</button>
+        </div>
+        <div class="settings-row settings-actions">
+          <button id="hide-btn">숨기기</button>
+          <button id="dnd-btn">방해금지</button>
+        </div>
+      </div>
       <div id="bubble" class="bubble hidden"></div>
       <canvas id="sprite" width="20" height="20"></canvas>
       <div class="gauges">

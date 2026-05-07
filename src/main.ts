@@ -1,10 +1,13 @@
 import './style.css';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { initCharacter, renderFrame, setState, getState } from './character';
 import { loadStats, persistStats, tickDecay, getStats } from './stats';
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge } from './gauge';
 import { initInteractions } from './interactions';
+import { initSettings, setSize, setOpacity, hideWindow, toggleDoNotDisturb, isDoNotDisturb } from './settings';
+import type { SizePreset, OpacityPreset } from './settings';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -25,8 +28,58 @@ async function main() {
   initGauge(moodBar);
   initInteractions(canvas);
 
+  await initSettings();
+
+  // Settings panel toggle
+  const settingsBtn   = document.getElementById('settings-btn')!;
+  const settingsPanel = document.getElementById('settings-panel')!;
+
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = !settingsPanel.classList.contains('hidden');
+    settingsPanel.classList.toggle('hidden', open);
+    settingsBtn.classList.toggle('open', !open);
+  });
+
+  document.addEventListener('click', () => {
+    settingsPanel.classList.add('hidden');
+    settingsBtn.classList.remove('open');
+  });
+
+  settingsPanel.addEventListener('click', (e) => e.stopPropagation());
+
+  // Size buttons
+  document.querySelectorAll<HTMLElement>('[data-size]').forEach(btn => {
+    btn.addEventListener('click', () => setSize(btn.dataset.size as SizePreset));
+  });
+
+  // Opacity buttons
+  document.querySelectorAll<HTMLElement>('[data-opacity]').forEach(btn => {
+    btn.addEventListener('click', () => setOpacity(btn.dataset.opacity as OpacityPreset));
+  });
+
+  // Hide / Do Not Disturb buttons
+  document.getElementById('hide-btn')!.addEventListener('click', () => hideWindow());
+  const dndBtn = document.getElementById('dnd-btn')!;
+  dndBtn.addEventListener('click', async () => {
+    await toggleDoNotDisturb();
+    dndBtn.classList.toggle('active', isDoNotDisturb());
+  });
+
+  // Tray "방해 금지" event
+  await listen('toggle-dnd', async () => {
+    await toggleDoNotDisturb();
+    dndBtn.classList.toggle('active', isDoNotDisturb());
+  });
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') invoke('quit');
+    if (e.key === 'l' && e.ctrlKey) {
+      e.preventDefault();
+      toggleDoNotDisturb().then(() => {
+        dndBtn.classList.toggle('active', isDoNotDisturb());
+      });
+    }
   });
 
   const stats = await loadStats();

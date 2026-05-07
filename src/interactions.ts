@@ -14,6 +14,20 @@ const HURT_MESSAGES = [
   '잠깐만요, 아프잖아요!',
 ];
 
+const COMBO_MID_MESSAGES = [
+  '왜 또 때리세요!',
+  '으으... 계속 때리시는 건가요?',
+  '(>_<) 그만해 주세요!',
+  '아직도 그러실 건가요...',
+];
+
+const COMBO_MAX_MESSAGES = [
+  '그만요!!!',
+  '화날 것 같아요!',
+  '(x_x) 진짜 화낼 거예요!',
+  '제발 멈춰 주세요!!!',
+];
+
 const DRAG_MESSAGES = [
   '어지러워요~',
   '흔들흔들...',
@@ -37,6 +51,8 @@ const LONG_DRAG_MESSAGES = [
 ];
 
 let clickCooldown = false;
+let comboCount = 0;
+let comboResetTimer: ReturnType<typeof setTimeout> | null = null;
 
 function resolveIdle() {
   const { mood } = getStats();
@@ -130,11 +146,30 @@ function handleClick(e: MouseEvent) {
   e.preventDefault();
   if (clickCooldown) return;
   clickCooldown = true;
-  setTimeout(() => { clickCooldown = false; }, 800);
+  setTimeout(() => { clickCooldown = false; }, 250);
+
+  comboCount += 1;
+  if (comboResetTimer !== null) clearTimeout(comboResetTimer);
+  comboResetTimer = setTimeout(() => { comboCount = 0; comboResetTimer = null; }, 1500);
+
+  let msg: string;
+  let moodDelta: number;
+  if (comboCount >= 5) {
+    msg = pick(COMBO_MAX_MESSAGES);
+    moodDelta = -5;
+  } else if (comboCount >= 3) {
+    msg = pick(COMBO_MID_MESSAGES);
+    moodDelta = -4;
+  } else {
+    msg = pick(HURT_MESSAGES);
+    moodDelta = -3;
+  }
+
+  if (comboCount >= 2) msg = `${msg} x${comboCount}`;
 
   setState('hit');
-  adjustMood(-3);
-  showBubble(pick(HURT_MESSAGES));
+  adjustMood(moodDelta);
+  showBubble(msg);
   setTimeout(() => resolveIdle(), 600);
 }
 

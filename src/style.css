@@ -112,3 +112,105 @@ body {
   border-radius: 4px;
   transition: width 0.5s ease, background-color 0.5s ease;
 }
+
+/* ── 설정 버튼 ── */
+#settings-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 20;
+  line-height: 1;
+  padding: 2px;
+}
+
+#app:hover #settings-btn {
+  opacity: 0.5;
+}
+
+#settings-btn:hover,
+#settings-btn.open {
+  opacity: 1 !important;
+}
+
+/* ── 설정 패널 ── */
+#settings-panel {
+  position: absolute;
+  top: 22px;
+  right: 4px;
+  background: rgba(30, 30, 30, 0.92);
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 19;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+#settings-panel.hidden {
+  display: none;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings-label {
+  font-size: 10px;
+  color: #aaa;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.settings-row button {
+  font-size: 10px;
+  padding: 2px 6px;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background: #333;
+  color: #ddd;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings-row button:hover {
+  background: #555;
+}
+
+.settings-row button.active {
+  background: #666;
+  border-color: #aaa;
+  color: #fff;
+}
+
+.settings-actions {
+  margin-top: 2px;
+  border-top: 1px solid #444;
+  padding-top: 6px;
+}
+
+.settings-actions button {
+  flex: 1;
+}
+
+#dnd-btn.active {
+  background: #7a3;
+  border-color: #9c5;
+  color: #fff;
+}
+
+/* ── 방해 금지 표시 ── */
+#app.dnd-active {
+  outline: 2px dashed rgba(180, 220, 100, 0.7);
+  outline-offset: -2px;
+  opacity: 0.65;
+}

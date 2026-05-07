@@ -29,8 +29,11 @@ pub fn run() {
             let autostart = CheckMenuItem::with_id(
                 app, "autostart", "자동 시작", true, is_enabled, None::<&str>,
             )?;
+            let dnd = CheckMenuItem::with_id(
+                app, "dnd", "방해 금지", true, false, None::<&str>,
+            )?;
             let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&autostart, &quit])?;
+            let menu = Menu::with_items(app, &[&autostart, &dnd, &quit])?;
 
             let mut tray = TrayIconBuilder::new()
                 .menu(&menu)
@@ -44,6 +47,9 @@ pub fn run() {
                         } else {
                             let _ = autolaunch.enable();
                         }
+                    }
+                    "dnd" => {
+                        let _ = app.emit("toggle-dnd", ());
                     }
                     _ => {}
                 })
