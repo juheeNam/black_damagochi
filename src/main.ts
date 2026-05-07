@@ -11,6 +11,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
 import { QUEST_LIST, startQuest, collectQuest, cancelQuest, getProgress, isComplete, formatRemaining, getQuestDef } from './quests';
+import { selectItem, cancelSelection } from './throw';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -222,13 +223,16 @@ async function main() {
 
   // ── 단축키 ───────────────────────────────────────────────
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') invoke('quit');
+    if (e.key === 'Escape') { cancelSelection(); invoke('quit'); }
     if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault();
       toggleDoNotDisturb().then(() => {
         dndBtn.classList.toggle('active', isDoNotDisturb());
       });
     }
+    if (e.key === '1') selectItem('paper');
+    if (e.key === '2') selectItem('pen');
+    if (e.key === '3') selectItem('slipper');
   });
 
   // ── 초기 stats 로드 ──────────────────────────────────────

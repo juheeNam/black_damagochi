@@ -3,6 +3,7 @@ import { setState, renderFrame } from './character';
 import { adjustMood, gainExp, getStats } from './stats';
 import { isUnlocked } from './skills';
 import { showBubble } from './bubble';
+import { getSelectedItem, executeThrow } from './throw';
 
 const HURT_MESSAGES = [
   '(x_x) 아파요...',
@@ -41,6 +42,21 @@ const COMBO_MAX_MESSAGES = [
   '화날 것 같아요!',
   '(x_x) 진짜 화낼 거예요!',
   '제발 멈춰 주세요!!!',
+];
+
+const THROW_HIT_MESSAGES = [
+  '아야!! (>_<)',
+  '으아!! (#`Д´)',
+  '꺄악!! 왜 던지세요!',
+  '이게 뭐야! (◣_◢)',
+  '아프잖아요!! (x_x)',
+];
+
+const THROW_MISS_MESSAGES = [
+  '빗나갔다! (°□°)',
+  '뭐야! 다시!!',
+  '아슬아슬... 다음엔 맞는다',
+  '흐흐... 못 맞추셨네요',
 ];
 
 const DRAG_MESSAGES = [
@@ -160,6 +176,24 @@ export function initInteractions(spriteEl: HTMLElement) {
 
 function handleClick(e: MouseEvent) {
   e.preventDefault();
+
+  // 투척 모드 우선 처리
+  if (getSelectedItem() !== null) {
+    const result = executeThrow();
+    if (result) {
+      if (result.hit) {
+        setState('hit');
+        adjustMood(result.def.moodDelta);
+        gainExp(result.def.exp);
+        showBubble(pick(THROW_HIT_MESSAGES));
+        setTimeout(() => resolveIdle(), 800);
+      } else {
+        showBubble(pick(THROW_MISS_MESSAGES));
+      }
+    }
+    return;
+  }
+
   if (clickCooldown) return;
   clickCooldown = true;
   setTimeout(() => { clickCooldown = false; }, 250);
