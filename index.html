@@ -10,6 +10,7 @@
   <body>
     <div id="app">
       <div id="settings-panel" class="hidden">
+        <button class="panel-back-btn" id="settings-close-btn">× 닫기</button>
         <div class="settings-row">
           <span class="settings-label">크기</span>
           <button data-size="small">S</button>
@@ -30,8 +31,8 @@
           <button id="skill-btn">⚡ 스킬</button>
         </div>
       </div>
-      <div id="bubble" class="bubble hidden"></div>
       <div class="pet-area">
+      <div id="bubble" class="bubble hidden"></div>
       <canvas id="sprite" width="20" height="20"></canvas>
       <div class="gauges">
         <div class="gauge-row">

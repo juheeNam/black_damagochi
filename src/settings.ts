@@ -42,6 +42,12 @@ export async function initSettings() {
   if (dnd) document.getElementById('app')?.classList.add('dnd-active');
 }
 
+const BUBBLE_FONT_MAP: Record<SizePreset, string> = {
+  small:  '10px',
+  medium: '12px',
+  large:  '14px',
+};
+
 async function applySize(preset: SizePreset) {
   const [w, h] = SIZE_MAP[preset];
   const spriteSize = SPRITE_SIZE_MAP[preset];
@@ -53,6 +59,8 @@ async function applySize(preset: SizePreset) {
   if (app) { app.style.width = `${w}px`; app.style.height = `${h}px`; }
   const sprite = document.getElementById('sprite') as HTMLCanvasElement | null;
   if (sprite) { sprite.style.width = `${spriteSize}px`; sprite.style.height = `${spriteSize}px`; }
+  const bubble = document.getElementById('bubble') as HTMLElement | null;
+  if (bubble) bubble.style.fontSize = BUBBLE_FONT_MAP[preset];
 }
 
 function applyOpacity(preset: OpacityPreset) {

@@ -21,7 +21,7 @@ function resolveIdle(mood: number) {
 }
 
 // ── 심부름 패널 UI ──────────────────────────────────────────
-function buildQuestList() {
+function buildQuestList(onStart: () => void) {
   const listEl = document.getElementById('quest-list')!;
   listEl.innerHTML = '<div class="popup-title">📋 심부름</div>';
   QUEST_LIST.forEach(q => {
@@ -35,7 +35,7 @@ function buildQuestList() {
     item.addEventListener('click', () => {
       startQuest(q.id);
       showBubble(`${q.name} 중...`, 3000);
-      updateQuestPanel();
+      onStart();
     });
     listEl.appendChild(item);
   });
@@ -168,8 +168,11 @@ async function main() {
     dndBtn.classList.toggle('active', isDoNotDisturb());
   });
 
+  // ── 설정 패널 닫기 버튼 ─────────────────────────────────
+  document.getElementById('settings-close-btn')!.addEventListener('click', () => closeAllPanels());
+
   // ── 심부름 패널 ──────────────────────────────────────────
-  buildQuestList();
+  buildQuestList(closeAllPanels);
 
   document.getElementById('quest-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
