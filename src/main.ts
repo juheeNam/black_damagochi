@@ -160,9 +160,24 @@ async function main() {
 
   document.getElementById('hide-btn')!.addEventListener('click', () => toggleMini());
   const miniRestoreBtn = document.getElementById('mini-restore-btn')!;
-  miniRestoreBtn.addEventListener('click', () => toggleMini());
+  let miniDragging = false;
   miniRestoreBtn.addEventListener('mousedown', (e) => {
-    if (e.button === 0) getCurrentWindow().startDragging();
+    if (e.button !== 0) return;
+    miniDragging = false;
+    const startX = e.clientX, startY = e.clientY;
+    const onMove = (me: MouseEvent) => {
+      if (!miniDragging && Math.hypot(me.clientX - startX, me.clientY - startY) > 4) {
+        miniDragging = true;
+        getCurrentWindow().startDragging();
+        document.removeEventListener('mousemove', onMove);
+      }
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onMove), { once: true });
+  });
+  miniRestoreBtn.addEventListener('click', () => {
+    if (!miniDragging) toggleMini();
+    miniDragging = false;
   });
   const dndBtn = document.getElementById('dnd-btn')!;
   dndBtn.addEventListener('click', async () => {
@@ -202,8 +217,11 @@ async function main() {
     updateQuestPanel();
   });
 
-  document.getElementById('quest-back-btn')!.addEventListener('click', () => {
-    closeAllPanels();
+  document.getElementById('quest-back-btn')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    questPanel.classList.add('hidden');
+    settingsPanel.classList.remove('hidden');
+    settingsBtn.classList.add('open');
   });
 
   // ── 스킬 패널 ────────────────────────────────────────────
@@ -217,8 +235,11 @@ async function main() {
     }
   });
 
-  document.getElementById('skill-back-btn')!.addEventListener('click', () => {
-    closeAllPanels();
+  document.getElementById('skill-back-btn')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skillPanel.classList.add('hidden');
+    settingsPanel.classList.remove('hidden');
+    settingsBtn.classList.add('open');
   });
 
   // ── 단축키 ───────────────────────────────────────────────
