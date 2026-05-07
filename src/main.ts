@@ -6,7 +6,7 @@ import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill } 
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, hideWindow, toggleDoNotDisturb, isDoNotDisturb } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb } from './settings';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
 import { QUEST_LIST, startQuest, collectQuest, cancelQuest, getProgress, isComplete, formatRemaining, getQuestDef } from './quests';
@@ -156,7 +156,8 @@ async function main() {
     btn.addEventListener('click', () => setOpacity(btn.dataset.opacity as OpacityPreset));
   });
 
-  document.getElementById('hide-btn')!.addEventListener('click', () => hideWindow());
+  document.getElementById('hide-btn')!.addEventListener('click', () => toggleMini());
+  document.getElementById('mini-restore-btn')!.addEventListener('click', () => toggleMini());
   const dndBtn = document.getElementById('dnd-btn')!;
   dndBtn.addEventListener('click', async () => {
     await toggleDoNotDisturb();

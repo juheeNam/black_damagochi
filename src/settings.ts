@@ -24,6 +24,8 @@ const OPACITY_MAP: Record<OpacityPreset, number> = {
 };
 
 let currentDnd = false;
+let isMinimized = false;
+let savedSizePreset: SizePreset = 'medium';
 let store: Awaited<ReturnType<typeof load>> | null = null;
 
 export async function initSettings() {
@@ -49,6 +51,7 @@ const BUBBLE_FONT_MAP: Record<SizePreset, string> = {
 };
 
 async function applySize(preset: SizePreset) {
+  savedSizePreset = preset;
   const [w, h] = SIZE_MAP[preset];
   const spriteSize = SPRITE_SIZE_MAP[preset];
   const win = getCurrentWindow();
@@ -68,12 +71,10 @@ function applyOpacity(preset: OpacityPreset) {
   if (app) app.style.opacity = String(OPACITY_MAP[preset]);
 }
 
-async function applyDnd(enabled: boolean) {
+function applyDnd(enabled: boolean) {
   currentDnd = enabled;
-  const win = getCurrentWindow();
-  await win.setIgnoreCursorEvents(enabled);
-  const app = document.getElementById('app');
-  if (app) app.classList.toggle('dnd-active', enabled);
+  document.getElementById('app')?.classList.toggle('dnd-active', enabled);
+  document.getElementById('sprite')?.classList.toggle('dnd-mode', enabled);
   setBubbleDnd(enabled);
 }
 
@@ -102,7 +103,7 @@ export async function setOpacity(preset: OpacityPreset) {
 }
 
 export async function setDoNotDisturb(enabled: boolean) {
-  await applyDnd(enabled);
+  applyDnd(enabled);
   if (store) await store.set('dnd', enabled);
 }
 
@@ -114,6 +115,15 @@ export function isDoNotDisturb() {
   return currentDnd;
 }
 
-export async function hideWindow() {
-  await getCurrentWindow().hide();
+export async function toggleMini() {
+  const win = getCurrentWindow();
+  if (isMinimized) {
+    isMinimized = false;
+    document.getElementById('app')?.classList.remove('minimized');
+    await applySize(savedSizePreset);
+  } else {
+    isMinimized = true;
+    document.getElementById('app')?.classList.add('minimized');
+    await win.setSize(new LogicalSize(40, 40));
+  }
 }
