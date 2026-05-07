@@ -1,5 +1,6 @@
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { load } from '@tauri-apps/plugin-store';
+import { setBubbleDnd } from './bubble';
 
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
@@ -8,6 +9,12 @@ const SIZE_MAP: Record<SizePreset, [number, number]> = {
   small:  [140, 168],
   medium: [200, 240],
   large:  [280, 336],
+};
+
+const SPRITE_SIZE_MAP: Record<SizePreset, number> = {
+  small:  60,
+  medium: 80,
+  large:  110,
 };
 
 const OPACITY_MAP: Record<OpacityPreset, number> = {
@@ -37,12 +44,15 @@ export async function initSettings() {
 
 async function applySize(preset: SizePreset) {
   const [w, h] = SIZE_MAP[preset];
+  const spriteSize = SPRITE_SIZE_MAP[preset];
   const win = getCurrentWindow();
   await win.setSize(new LogicalSize(w, h));
   document.body.style.width  = `${w}px`;
   document.body.style.height = `${h}px`;
   const app = document.getElementById('app');
   if (app) { app.style.width = `${w}px`; app.style.height = `${h}px`; }
+  const sprite = document.getElementById('sprite') as HTMLCanvasElement | null;
+  if (sprite) { sprite.style.width = `${spriteSize}px`; sprite.style.height = `${spriteSize}px`; }
 }
 
 function applyOpacity(preset: OpacityPreset) {
@@ -56,6 +66,7 @@ async function applyDnd(enabled: boolean) {
   await win.setIgnoreCursorEvents(enabled);
   const app = document.getElementById('app');
   if (app) app.classList.toggle('dnd-active', enabled);
+  setBubbleDnd(enabled);
 }
 
 function syncSizeButtons(active: SizePreset) {

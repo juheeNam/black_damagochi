@@ -34,6 +34,7 @@ function buildQuestList() {
     `;
     item.addEventListener('click', () => {
       startQuest(q.id);
+      showBubble(`${q.name} 중...`, 3000);
       updateQuestPanel();
     });
     listEl.appendChild(item);
@@ -183,12 +184,16 @@ async function main() {
   document.getElementById('quest-collect-btn')!.addEventListener('click', () => {
     const exp = collectQuest();
     if (exp > 0) showBubble(`+${exp} EXP 획득!`, 2000);
-    updateQuestPanel();
+    closeAllPanels();
   });
 
   document.getElementById('quest-cancel-btn')!.addEventListener('click', () => {
     cancelQuest();
     updateQuestPanel();
+  });
+
+  document.getElementById('quest-back-btn')!.addEventListener('click', () => {
+    closeAllPanels();
   });
 
   // ── 스킬 패널 ────────────────────────────────────────────
@@ -200,6 +205,10 @@ async function main() {
       buildSkillPanel();
       skillPanel.classList.remove('hidden');
     }
+  });
+
+  document.getElementById('skill-back-btn')!.addEventListener('click', () => {
+    closeAllPanels();
   });
 
   // ── 단축키 ───────────────────────────────────────────────
@@ -234,11 +243,12 @@ async function main() {
   }
 
   // ── 게임 루프 ────────────────────────────────────────────
-  let lastTime     = performance.now();
-  let saveAccum    = 0;
-  let chatterAccum = 0;
-  let questAccum   = 0;
-  let moodWarned   = false;
+  let lastTime           = performance.now();
+  let saveAccum          = 0;
+  let chatterAccum       = 0;
+  let questAccum         = 0;
+  let moodWarned         = false;
+  let questCompleteNotified = false;
 
   let nextChatterMs = randomBetween(3 * 60_000, 5 * 60_000);
 
@@ -283,8 +293,17 @@ async function main() {
     if (questAccum >= 1000) {
       questAccum = 0;
       if (quest && isComplete(quest)) {
-        const questBadge = document.getElementById('quest-btn');
-        if (questBadge) questBadge.textContent = '📋 심부름 ●';
+        if (!questCompleteNotified) {
+          questCompleteNotified = true;
+          const def = getQuestDef(quest.id);
+          if (def) showBubble(`${def.name} 완료!`, 3000);
+          const questBtnEl = document.getElementById('quest-btn');
+          if (questBtnEl) questBtnEl.textContent = '📋 심부름 ●';
+        }
+      } else if (!quest) {
+        questCompleteNotified = false;
+        const questBtnEl = document.getElementById('quest-btn');
+        if (questBtnEl) questBtnEl.textContent = '📋 심부름';
       }
       // 패널 열려있으면 진행률 갱신
       if (!document.getElementById('quest-panel')!.classList.contains('hidden')) {

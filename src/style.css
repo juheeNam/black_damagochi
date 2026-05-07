@@ -82,8 +82,10 @@ body {
   pointer-events: none;
 }
 
-#sprite:hover ~ .gauges {
+#sprite:hover ~ .gauges,
+.gauges:hover {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .gauge-row {
@@ -129,7 +131,7 @@ body {
 /* ── 팝업 패널 (심부름/스킬 공통) ── */
 .popup-panel {
   position: absolute;
-  bottom: 60px;
+  bottom: 32px;
   right: 4px;
   background: rgba(30, 30, 30, 0.95);
   border: 1px solid #555;
@@ -145,6 +147,21 @@ body {
 
 .popup-panel.hidden {
   display: none;
+}
+
+.panel-back-btn {
+  font-size: 9px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 0 4px 0;
+  text-align: left;
+  transition: color 0.15s;
+}
+
+.panel-back-btn:hover {
+  color: #ccc;
 }
 
 .popup-title {
@@ -264,33 +281,29 @@ body {
 
 /* ── 설정 버튼 ── */
 #settings-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
   background: none;
   border: none;
-  font-size: 14px;
+  font-size: 11px;
   cursor: pointer;
-  opacity: 0;
+  opacity: 0.55;
   transition: opacity 0.2s ease;
   z-index: 20;
   line-height: 1;
-  padding: 2px;
-}
-
-#app:hover #settings-btn {
-  opacity: 0.5;
+  padding: 0 0 0 3px;
+  color: #bbb;
+  flex-shrink: 0;
 }
 
 #settings-btn:hover,
 #settings-btn.open {
-  opacity: 1 !important;
+  opacity: 1;
+  color: #fff;
 }
 
 /* ── 설정 패널 ── */
 #settings-panel {
   position: absolute;
-  top: 22px;
+  bottom: 32px;
   right: 4px;
   background: rgba(30, 30, 30, 0.92);
   border: 1px solid #555;
@@ -300,7 +313,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-width: 120px;
+  min-width: 160px;
 }
 
 #settings-panel.hidden {
