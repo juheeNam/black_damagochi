@@ -20,7 +20,7 @@ let currentDnd = false;
 let store: Awaited<ReturnType<typeof load>> | null = null;
 
 export async function initSettings() {
-  store = await load('settings.json', { autoSave: true });
+  store = await load('settings.json');
 
   const size    = (await store.get<SizePreset>('size'))    ?? 'medium';
   const opacity = (await store.get<OpacityPreset>('opacity')) ?? 'normal';

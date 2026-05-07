@@ -1,6 +1,7 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { setState, renderFrame } from './character';
-import { adjustMood, getStats } from './stats';
+import { adjustMood, gainExp, getStats } from './stats';
+import { isUnlocked } from './skills';
 import { showBubble } from './bubble';
 
 const HURT_MESSAGES = [
@@ -12,6 +13,20 @@ const HURT_MESSAGES = [
   '으아아... 살살 해주세요',
   '(T_T) 속상해요',
   '잠깐만요, 아프잖아요!',
+];
+
+const VERBAL_MESSAGES = [
+  '(x_x) 살려주세요...',
+  '이러실 필요 없잖아요!',
+  '(;_;) 너무 심하세요!',
+  '으아아!! 제발요!',
+  '(T▽T) 무서워요...',
+];
+
+const DOMINATE_MESSAGES = [
+  '네... 알겠습니다... (훌쩍)',
+  '죄송합니다... 잘못했어요...',
+  '(ㅠ_ㅠ) 시키는 대로 할게요...',
 ];
 
 const COMBO_MID_MESSAGES = [
@@ -98,6 +113,7 @@ export function initInteractions(spriteEl: HTMLElement) {
           document.removeEventListener('pointercancel', onPointerUp);
           const duration = Date.now() - dragStartTime;
           isDragging = false;
+          gainExp(isUnlocked('pressure') ? 7 : 5);
           if (duration >= 3000) {
             setState('angry');
             renderFrame();
@@ -167,8 +183,18 @@ function handleClick(e: MouseEvent) {
 
   if (comboCount >= 2) msg = `${msg} x${comboCount}`;
 
+  // 스킬 효과: 언어폭력 해금 시 특수 메시지 가능, 완전지배 해금 시 복종 리액션
+  if (isUnlocked('dominate') && getStats().mood < 15 && Math.random() < 0.4) {
+    msg = pick(DOMINATE_MESSAGES);
+  } else if (isUnlocked('verbal') && Math.random() < 0.3) {
+    msg = pick(VERBAL_MESSAGES);
+    if (comboCount >= 2) msg = `${msg} x${comboCount}`;
+  }
+
+  const nerveBonus = isUnlocked('nerve') ? 1 : 0;
   setState('hit');
-  adjustMood(moodDelta);
+  adjustMood(moodDelta - nerveBonus);
+  gainExp(2);
   showBubble(msg);
   setTimeout(() => resolveIdle(), 600);
 }
@@ -176,6 +202,7 @@ function handleClick(e: MouseEvent) {
 function handleFeed(e: MouseEvent) {
   e.preventDefault();
   adjustMood(30);
+  gainExp(1);
   setState('hit');
   showBubble(pick(FEED_MESSAGES));
   setTimeout(() => resolveIdle(), 800);

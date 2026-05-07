@@ -26,6 +26,10 @@
           <button id="hide-btn">숨기기</button>
           <button id="dnd-btn">방해금지</button>
         </div>
+        <div class="settings-row settings-actions">
+          <button id="quest-btn">📋 심부름</button>
+          <button id="skill-btn">⚡ 스킬</button>
+        </div>
       </div>
       <div id="bubble" class="bubble hidden"></div>
       <canvas id="sprite" width="20" height="20"></canvas>
@@ -34,6 +38,36 @@
           <span class="gauge-label">♥</span>
           <div class="gauge-wrap"><div id="mood-bar" class="gauge-bar"></div></div>
         </div>
+        <div class="gauge-row">
+          <span class="gauge-label">⭐</span>
+          <div class="gauge-wrap"><div id="exp-bar" class="gauge-bar exp"></div></div>
+          <span id="level-display" class="level-text">Lv.1</span>
+        </div>
+      </div>
+
+      <!-- 심부름 팝업 -->
+      <div id="quest-panel" class="popup-panel hidden">
+        <div id="quest-list">
+          <div class="popup-title">📋 심부름</div>
+        </div>
+        <div id="quest-progress" class="hidden">
+          <div class="popup-title">진행 중</div>
+          <div id="quest-name" class="quest-active-name"></div>
+          <div class="gauge-wrap quest-progress-wrap">
+            <div id="quest-progress-bar" class="gauge-bar" style="background:#f0a500"></div>
+          </div>
+          <div id="quest-time" class="quest-time"></div>
+          <div class="quest-actions">
+            <button id="quest-collect-btn" class="hidden">수령하기 ✓</button>
+            <button id="quest-cancel-btn">취소</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 스킬 팝업 -->
+      <div id="skill-panel" class="popup-panel hidden">
+        <div class="popup-title">⚡ 스킬</div>
+        <div id="skill-list"></div>
       </div>
     </div>
   </body>
