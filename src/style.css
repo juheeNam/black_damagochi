@@ -71,7 +71,14 @@ body {
   display: none;
 }
 
-/* 게이지: 평소에 숨김, 스프라이트 호버 시에만 표시 */
+/* 캐릭터+게이지 wrapper — 이 안에서 hover 연속성 보장 */
+.pet-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 게이지: 평소에 숨김, pet-area 호버 시에만 표시 */
 .gauges {
   display: flex;
   flex-direction: column;
@@ -82,8 +89,7 @@ body {
   pointer-events: none;
 }
 
-#sprite:hover ~ .gauges,
-.gauges:hover {
+.pet-area:hover .gauges {
   opacity: 1;
   pointer-events: auto;
 }
@@ -285,12 +291,12 @@ body {
   border: none;
   font-size: 11px;
   cursor: pointer;
-  opacity: 0.55;
+  opacity: 0.85;
   transition: opacity 0.2s ease;
   z-index: 20;
   line-height: 1;
   padding: 0 0 0 3px;
-  color: #bbb;
+  color: #ddd;
   flex-shrink: 0;
 }
 
