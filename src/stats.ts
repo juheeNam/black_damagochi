@@ -113,3 +113,8 @@ export function setQuest(quest: ActiveQuest) {
 export function clearQuest() {
   stats.quest = null;
 }
+
+export async function resetAllData() {
+  if (!store) return;
+  await store.clear();
+}

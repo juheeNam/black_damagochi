@@ -2,16 +2,17 @@ import './style.css';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { initCharacter, renderFrame, setState, getState } from './character';
-import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill } from './stats';
+import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill, resetAllData as resetStatsData } from './stats';
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings } from './settings';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
 import { QUEST_LIST, startQuest, collectQuest, cancelQuest, getProgress, isComplete, formatRemaining, getQuestDef } from './quests';
 import { selectItem, cancelSelection } from './throw';
+import { notify } from './notifications';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -110,6 +111,7 @@ async function main() {
   // ── 레벨업 콜백 등록 ─────────────────────────────────────
   onLevelUp((newLevel) => {
     showBubble(`★ 레벨 업! Lv.${newLevel}`, 3000);
+    notify('★ 레벨 업!', `Lv.${newLevel} 달성`);
     setState('hit');
     setTimeout(() => resolveIdle(getStats().mood), 1500);
 
@@ -128,11 +130,13 @@ async function main() {
   const settingsPanel = document.getElementById('settings-panel')!;
   const questPanel    = document.getElementById('quest-panel')!;
   const skillPanel    = document.getElementById('skill-panel')!;
+  const resetConfirm  = document.getElementById('reset-confirm')!;
 
   function closeAllPanels() {
     settingsPanel.classList.add('hidden');
     questPanel.classList.add('hidden');
     skillPanel.classList.add('hidden');
+    resetConfirm.classList.add('hidden');
     settingsBtn.classList.remove('open');
   }
 
@@ -150,6 +154,7 @@ async function main() {
   settingsPanel.addEventListener('click', (e) => e.stopPropagation());
   questPanel.addEventListener('click', (e) => e.stopPropagation());
   skillPanel.addEventListener('click', (e) => e.stopPropagation());
+  resetConfirm.addEventListener('click', (e) => e.stopPropagation());
 
   document.querySelectorAll<HTMLElement>('[data-size]').forEach(btn => {
     btn.addEventListener('click', () => setSize(btn.dataset.size as SizePreset));
@@ -192,6 +197,26 @@ async function main() {
 
   // ── 설정 패널 닫기 버튼 ─────────────────────────────────
   document.getElementById('settings-close-btn')!.addEventListener('click', () => closeAllPanels());
+
+  // ── 알림 토글 ────────────────────────────────────────────
+  document.getElementById('notif-btn')!.addEventListener('click', async () => {
+    await setNotif(!isNotifSetting());
+  });
+
+  // ── 데이터 초기화 ────────────────────────────────────────
+  document.getElementById('reset-btn')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllPanels();
+    resetConfirm.classList.remove('hidden');
+  });
+  document.getElementById('reset-ok-btn')!.addEventListener('click', async () => {
+    await resetStatsData();
+    await resetSettings();
+    window.location.reload();
+  });
+  document.getElementById('reset-cancel-btn')!.addEventListener('click', () => {
+    resetConfirm.classList.add('hidden');
+  });
 
   // ── 심부름 패널 ──────────────────────────────────────────
   buildQuestList(closeAllPanels);
@@ -309,6 +334,7 @@ async function main() {
     if (mood < 20 && !moodWarned) {
       moodWarned = true;
       showBubble('(；ω；) 외로워...', 3000);
+      notify('(；ω；) 상사가 많이 외로워합니다...');
       setState('dizzy');
       setTimeout(() => resolveIdle(getStats().mood), 1500);
     } else if (mood >= 20) {
@@ -330,7 +356,10 @@ async function main() {
         if (!questCompleteNotified) {
           questCompleteNotified = true;
           const def = getQuestDef(quest.id);
-          if (def) showBubble(`${def.name} 완료!`, 3000);
+          if (def) {
+            showBubble(`${def.name} 완료!`, 3000);
+            notify(`📋 ${def.name} 완료!`, `+${def.exp} EXP 수령 대기 중`);
+          }
           const questBtnEl = document.getElementById('quest-btn');
           if (questBtnEl) questBtnEl.textContent = '📋 심부름 ●';
         }

@@ -376,10 +376,24 @@ body {
   flex: 1;
 }
 
-#dnd-btn.active {
+#dnd-btn.active,
+#notif-btn.active {
   background: #7a3;
   border-color: #9c5;
   color: #fff;
+}
+
+.reset-msg {
+  font-size: 10px;
+  color: #ccc;
+  padding: 4px 0 6px;
+  text-align: center;
+}
+
+#reset-ok-btn {
+  background: #7a2222 !important;
+  border-color: #c04040 !important;
+  color: #fff !important;
 }
 
 /* ── 방해 금지 표시 ── */

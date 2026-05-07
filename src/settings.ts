@@ -1,6 +1,7 @@
 import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { load } from '@tauri-apps/plugin-store';
 import { setBubbleDnd } from './bubble';
+import { setNotifEnabled, isNotifEnabled } from './notifications';
 
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
@@ -35,13 +36,17 @@ export async function initSettings() {
   const opacity = (await store.get<OpacityPreset>('opacity')) ?? 'normal';
   const dnd     = (await store.get<boolean>('dnd'))        ?? false;
 
+  const notif = (await store.get<boolean>('notif')) ?? true;
+
   await applySize(size);
   applyOpacity(opacity);
   if (dnd) await applyDnd(true);
+  setNotifEnabled(notif);
 
   syncSizeButtons(size);
   syncOpacityButtons(opacity);
   if (dnd) document.getElementById('app')?.classList.add('dnd-active');
+  document.getElementById('notif-btn')?.classList.toggle('active', notif);
 }
 
 const BUBBLE_FONT_MAP: Record<SizePreset, string> = {
@@ -121,6 +126,21 @@ export async function toggleDoNotDisturb() {
 
 export function isDoNotDisturb() {
   return currentDnd;
+}
+
+export async function setNotif(val: boolean) {
+  setNotifEnabled(val);
+  document.getElementById('notif-btn')?.classList.toggle('active', val);
+  if (store) await store.set('notif', val);
+}
+
+export function isNotifSetting(): boolean {
+  return isNotifEnabled();
+}
+
+export async function resetSettings() {
+  if (!store) return;
+  await store.clear();
 }
 
 export async function toggleMini() {

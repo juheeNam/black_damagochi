@@ -35,6 +35,10 @@
           <button id="quest-btn">📋 심부름</button>
           <button id="skill-btn">⚡ 스킬</button>
         </div>
+        <div class="settings-row settings-actions">
+          <button id="notif-btn">🔔 알림</button>
+          <button id="reset-btn">🗑 초기화</button>
+        </div>
       </div>
       <div class="pet-area">
       <div id="bubble" class="bubble hidden"></div>
@@ -78,6 +82,16 @@
         <button class="panel-back-btn" id="skill-back-btn">← 닫기</button>
         <div class="popup-title">⚡ 스킬</div>
         <div id="skill-list"></div>
+      </div>
+
+      <!-- 초기화 확인 팝업 -->
+      <div id="reset-confirm" class="popup-panel hidden">
+        <div class="popup-title">⚠ 데이터 초기화</div>
+        <div class="reset-msg">되돌릴 수 없습니다. 초기화할까요?</div>
+        <div class="quest-actions">
+          <button id="reset-ok-btn">확인</button>
+          <button id="reset-cancel-btn">취소</button>
+        </div>
       </div>
     </div>
   </body>
