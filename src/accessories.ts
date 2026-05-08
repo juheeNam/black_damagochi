@@ -26,9 +26,9 @@ export const HEAD_STYLES: HeadStyleDef[] = [
 
 export const BODY_STYLES: BodyStyleDef[] = [
   { id: 'no_tie',       name: '기본',        emoji: '👔' },
-  { id: 'tie_red',      name: '빨간 넥타이', emoji: '🔴' },
-  { id: 'tie_blue',     name: '파란 넥타이', emoji: '🔵' },
-  { id: 'tie_yellow',   name: '노란 넥타이', emoji: '🟡' },
+  { id: 'tie_red',      name: '빨간 넥타이', emoji: '🔶' },
+  { id: 'tie_blue',     name: '파란 넥타이', emoji: '🔷' },
+  { id: 'tie_yellow',   name: '노란 넥타이', emoji: '🔸' },
   { id: 'polka_red',    name: '빨강 땡땡이', emoji: '⭕' },
   { id: 'polka_blue',   name: '파랑 땡땡이', emoji: '🔵' },
   { id: 'polka_yellow', name: '노랑 땡땡이', emoji: '🟡' },
