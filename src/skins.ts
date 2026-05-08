@@ -4,7 +4,7 @@ export const SKIN_LIST: { id: SkinId; name: string; filter: string }[] = [
   { id: 'default', name: '기본',   filter: 'none' },
   { id: 'angry',   name: '분노형', filter: 'hue-rotate(320deg) saturate(2)' },
   { id: 'cold',    name: '냉혹형', filter: 'hue-rotate(195deg) saturate(1.3)' },
-  { id: 'golden',  name: '황금형', filter: 'hue-rotate(40deg) saturate(2.5) brightness(1.1)' },
+  { id: 'golden',  name: '외계인형', filter: 'hue-rotate(40deg) saturate(2.5) brightness(1.1)' },
 ];
 
 let currentSkin: SkinId = 'default';

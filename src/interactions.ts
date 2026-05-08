@@ -85,6 +85,15 @@ const LONG_DRAG_MESSAGES = [
 let clickCooldown = false;
 let comboCount = 0;
 let comboResetTimer: ReturnType<typeof setTimeout> | null = null;
+let lastInteractionTime = Date.now();
+
+export function getLastInteractionTime(): number {
+  return lastInteractionTime;
+}
+
+function recordInteraction() {
+  lastInteractionTime = Date.now();
+}
 
 function resolveIdle() {
   const { mood } = getStats();
@@ -110,6 +119,7 @@ export function initInteractions(spriteEl: HTMLElement) {
       const dy = me.clientY - startY;
       if (!isDragging && Math.sqrt(dx * dx + dy * dy) > 6) {
         isDragging = true;
+        recordInteraction();
         const dragStartTime = Date.now();
         setState('dizzy');
         renderFrame();
@@ -178,6 +188,7 @@ export function initInteractions(spriteEl: HTMLElement) {
 
 function handleClick(e: MouseEvent) {
   e.preventDefault();
+  recordInteraction();
 
   // 투척 모드 우선 처리
   if (getSelectedItem() !== null) {
@@ -239,6 +250,7 @@ function handleClick(e: MouseEvent) {
 
 function handleFeed(e: MouseEvent) {
   e.preventDefault();
+  recordInteraction();
   playFeed();
   adjustMood(30);
   gainExp(1);

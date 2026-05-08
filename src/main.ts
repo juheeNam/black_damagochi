@@ -13,6 +13,7 @@ import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked 
 import { QUEST_LIST, startQuest, collectQuest, cancelQuest, getProgress, isComplete, formatRemaining, getQuestDef } from './quests';
 import { selectItem, cancelSelection } from './throw';
 import { notify } from './notifications';
+import { getLastInteractionTime } from './interactions';
 import { playLevelUp } from './sounds';
 import { SKIN_LIST } from './skins';
 
@@ -350,11 +351,13 @@ async function main() {
   }
 
   // ── 게임 루프 ────────────────────────────────────────────
+  const NEGLECT_MS = 10 * 60_000;
   let lastTime           = performance.now();
   let saveAccum          = 0;
   let chatterAccum       = 0;
   let questAccum         = 0;
   let moodWarned         = false;
+  let neglectNotified    = false;
   let questCompleteNotified = false;
 
   let nextChatterMs = randomBetween(3 * 60_000, 5 * 60_000);
@@ -382,11 +385,18 @@ async function main() {
     if (mood < 20 && !moodWarned) {
       moodWarned = true;
       showBubble('(；ω；) 외로워...', 3000);
-      notify('(；ω；) 상사가 많이 외로워합니다...');
       setState('dizzy');
       setTimeout(() => resolveIdle(getStats().mood), 1500);
     } else if (mood >= 20) {
       moodWarned = false;
+    }
+
+    const neglected = Date.now() - getLastInteractionTime() >= NEGLECT_MS;
+    if (neglected && !neglectNotified) {
+      neglectNotified = true;
+      notify('(；ω；) 상사가 많이 외로워합니다...');
+    } else if (!neglected) {
+      neglectNotified = false;
     }
 
     if (chatterAccum >= nextChatterMs) {
