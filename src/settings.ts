@@ -5,6 +5,8 @@ import { setNotifEnabled, isNotifEnabled } from './notifications';
 import { applySkin } from './skins';
 import type { SkinId } from './skins';
 import { initSound, setSoundVolume } from './sounds';
+import { ACCESSORY_LIST } from './accessories';
+import type { AccessorySlot, EquippedAccessories } from './accessories';
 
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
@@ -19,6 +21,12 @@ const SPRITE_SIZE_MAP: Record<SizePreset, number> = {
   small:  60,
   medium: 80,
   large:  110,
+};
+
+const ACC_FONT_MAP: Record<SizePreset, string> = {
+  small:  '11px',
+  medium: '14px',
+  large:  '19px',
 };
 
 const OPACITY_MAP: Record<OpacityPreset, number> = {
@@ -43,12 +51,19 @@ export async function initSettings() {
   const sound  = (await store.get<number>('sound'))   ?? 0.5;
   const skin   = (await store.get<SkinId>('skin'))    ?? 'default';
 
+  const equipped: EquippedAccessories = {
+    top:  (await store.get<string | null>('equip_top'))  ?? null,
+    face: (await store.get<string | null>('equip_face')) ?? null,
+    neck: (await store.get<string | null>('equip_neck')) ?? null,
+  };
+
   await applySize(size);
   applyOpacity(opacity);
   if (dnd) await applyDnd(true);
   setNotifEnabled(notif);
   initSound(sound);
   applySkin(skin);
+  applyAccessories(equipped);
 
   syncSizeButtons(size);
   syncOpacityButtons(opacity);
@@ -77,8 +92,12 @@ async function applySize(preset: SizePreset) {
   if (app) { app.style.width = `${w}px`; app.style.height = `${h}px`; }
   const sprite = document.getElementById('sprite') as HTMLCanvasElement | null;
   if (sprite) { sprite.style.width = `${spriteSize}px`; sprite.style.height = `${spriteSize}px`; }
+  const wrap = sprite?.parentElement as HTMLElement | null;
+  if (wrap?.classList.contains('sprite-wrap')) { wrap.style.width = `${spriteSize}px`; wrap.style.height = `${spriteSize}px`; }
   const bubble = document.getElementById('bubble') as HTMLElement | null;
   if (bubble) bubble.style.fontSize = BUBBLE_FONT_MAP[preset];
+  const overlay = document.getElementById('accessory-overlay') as HTMLElement | null;
+  if (overlay) overlay.style.fontSize = ACC_FONT_MAP[preset];
 }
 
 function applyOpacity(preset: OpacityPreset) {
@@ -141,6 +160,21 @@ export function isDoNotDisturb() {
 export async function setSoundSetting(vol: number) {
   setSoundVolume(vol);
   if (store) await store.set('sound', vol);
+}
+
+function applyAccessories(equipped: EquippedAccessories) {
+  (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
+    const el = document.getElementById(`acc-${slot}`);
+    const def = equipped[slot] ? ACCESSORY_LIST.find(a => a.id === equipped[slot]) : null;
+    if (el) el.textContent = def?.emoji ?? '';
+  });
+}
+
+export async function setAccessory(slot: AccessorySlot, id: string | null) {
+  const el = document.getElementById(`acc-${slot}`);
+  const def = id ? ACCESSORY_LIST.find(a => a.id === id) : null;
+  if (el) el.textContent = def?.emoji ?? '';
+  if (store) await store.set(`equip_${slot}`, id);
 }
 
 export async function setSkin(id: SkinId) {

@@ -6,7 +6,7 @@ import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill, r
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setAccessory } from './settings';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
@@ -16,6 +16,8 @@ import { notify } from './notifications';
 import { getLastInteractionTime } from './interactions';
 import { playLevelUp } from './sounds';
 import { SKIN_LIST } from './skins';
+import { ACCESSORY_LIST, getSlotItems } from './accessories';
+import type { AccessorySlot } from './accessories';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -134,14 +136,14 @@ async function main() {
   const settingsPanel = document.getElementById('settings-panel')!;
   const questPanel    = document.getElementById('quest-panel')!;
   const skillPanel    = document.getElementById('skill-panel')!;
-  const skinPanel     = document.getElementById('skin-panel')!;
+  const coordPanel    = document.getElementById('coord-panel')!;
   const resetConfirm  = document.getElementById('reset-confirm')!;
 
   function closeAllPanels() {
     settingsPanel.classList.add('hidden');
     questPanel.classList.add('hidden');
     skillPanel.classList.add('hidden');
-    skinPanel.classList.add('hidden');
+    coordPanel.classList.add('hidden');
     resetConfirm.classList.add('hidden');
     settingsBtn.classList.remove('open');
   }
@@ -160,7 +162,7 @@ async function main() {
   settingsPanel.addEventListener('click', (e) => e.stopPropagation());
   questPanel.addEventListener('click', (e) => e.stopPropagation());
   skillPanel.addEventListener('click', (e) => e.stopPropagation());
-  skinPanel.addEventListener('click', (e) => e.stopPropagation());
+  coordPanel.addEventListener('click', (e) => e.stopPropagation());
   resetConfirm.addEventListener('click', (e) => e.stopPropagation());
 
   document.querySelectorAll<HTMLElement>('[data-size]').forEach(btn => {
@@ -274,10 +276,11 @@ async function main() {
     settingsBtn.classList.add('open');
   });
 
-  // ── 스킨 패널 ────────────────────────────────────────────
-  function buildSkinPanel() {
-    const listEl = document.getElementById('skin-list')!;
-    listEl.innerHTML = '';
+  // ── 코디 패널 (스킨 + 악세서리) ─────────────────────────
+  function buildCoordPanel() {
+    // 스킨
+    const skinListEl = document.getElementById('skin-list')!;
+    skinListEl.innerHTML = '';
     SKIN_LIST.forEach(skin => {
       const item = document.createElement('div');
       item.className = 'skin-item';
@@ -289,23 +292,68 @@ async function main() {
           el.classList.toggle('active', el.dataset.skinId === skin.id);
         });
       });
-      listEl.appendChild(item);
+      skinListEl.appendChild(item);
+    });
+
+    // 악세서리 슬롯
+    (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
+      const listEl = document.getElementById(`acc-${slot}-list`)!;
+      listEl.innerHTML = '';
+
+      const noneBtn = document.createElement('button');
+      noneBtn.className = 'acc-item none-item';
+      noneBtn.dataset.slot = slot;
+      noneBtn.dataset.accId = '';
+      noneBtn.textContent = '없음';
+      noneBtn.addEventListener('click', () => equipAcc(slot, null));
+      listEl.appendChild(noneBtn);
+
+      getSlotItems(slot).forEach(acc => {
+        const btn = document.createElement('button');
+        btn.className = 'acc-item';
+        btn.dataset.slot = slot;
+        btn.dataset.accId = acc.id;
+        btn.textContent = acc.emoji;
+        btn.title = acc.name;
+        btn.addEventListener('click', () => equipAcc(slot, acc.id));
+        listEl.appendChild(btn);
+      });
+    });
+
+    syncAccButtons();
+  }
+
+  async function equipAcc(slot: AccessorySlot, id: string | null) {
+    await setAccessory(slot, id);
+    syncAccButtons();
+  }
+
+  function syncAccButtons() {
+    const overlayEl = document.getElementById('accessory-overlay');
+    if (!overlayEl) return;
+    (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
+      const current = (document.getElementById(`acc-${slot}`) as HTMLElement)?.textContent ?? '';
+      const currentDef = ACCESSORY_LIST.find(a => a.emoji === current && a.slot === slot);
+      document.querySelectorAll<HTMLElement>(`[data-slot="${slot}"]`).forEach(btn => {
+        const isActive = currentDef ? btn.dataset.accId === currentDef.id : btn.dataset.accId === '';
+        btn.classList.toggle('active', isActive);
+      });
     });
   }
 
-  document.getElementById('skin-btn')!.addEventListener('click', (e) => {
+  document.getElementById('coord-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
-    const open = !skinPanel.classList.contains('hidden');
+    const open = !coordPanel.classList.contains('hidden');
     closeAllPanels();
     if (!open) {
-      buildSkinPanel();
-      skinPanel.classList.remove('hidden');
+      buildCoordPanel();
+      coordPanel.classList.remove('hidden');
     }
   });
 
-  document.getElementById('skin-back-btn')!.addEventListener('click', (e) => {
+  document.getElementById('coord-back-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
-    skinPanel.classList.add('hidden');
+    coordPanel.classList.add('hidden');
     settingsPanel.classList.remove('hidden');
     settingsBtn.classList.add('open');
   });
@@ -379,8 +427,13 @@ async function main() {
     renderFrame();
 
     const state = getState();
-    if (mood <= 30 && state === 'idle')  setState('angry');
-    if (mood >  30 && state === 'angry') setState('idle');
+    if (mood <= 0)                        setState('down');
+    else if (mood <= 30 && state === 'idle')  setState('angry');
+    else if (mood >  30 && state === 'angry') setState('idle');
+    else if (mood >  0  && state === 'down')  setState(mood <= 30 ? 'angry' : 'idle');
+
+    const badgeEl = document.getElementById('acc-badge');
+    if (badgeEl) badgeEl.classList.toggle('hidden', !quest);
 
     if (mood < 20 && !moodWarned) {
       moodWarned = true;
