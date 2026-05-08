@@ -6,7 +6,7 @@ import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill, r
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setAccessory } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setFaceStyle, setBodyStyle, getFaceStyle, getBodyStyle } from './settings';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
@@ -16,8 +16,8 @@ import { notify } from './notifications';
 import { getLastInteractionTime } from './interactions';
 import { playLevelUp } from './sounds';
 import { SKIN_LIST } from './skins';
-import { ACCESSORY_LIST, getSlotItems } from './accessories';
-import type { AccessorySlot } from './accessories';
+import { FACE_STYLES, BODY_STYLES } from './accessories';
+import { setQuestActive } from './character';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -112,6 +112,7 @@ async function main() {
   initInteractions(canvas);
 
   await initSettings();
+  updateQuestStatus();
 
   // ── 레벨업 콜백 등록 ─────────────────────────────────────
   onLevelUp((newLevel) => {
@@ -130,6 +131,29 @@ async function main() {
 
     buildSkillPanel();
   });
+
+  // ── 퀘스트 상태 표시 ─────────────────────────────────────
+  function updateQuestStatus() {
+    const statusEl = document.getElementById('quest-status');
+    if (!statusEl) return;
+    const { quest } = getStats();
+    if (!quest) {
+      statusEl.textContent = '';
+      statusEl.classList.add('hidden');
+      statusEl.classList.remove('done');
+      return;
+    }
+    const def = getQuestDef(quest.id);
+    const name = def?.name ?? '';
+    if (isComplete(quest)) {
+      statusEl.textContent = `-${name} 심부름 완료!-`;
+      statusEl.classList.remove('hidden');
+      statusEl.classList.add('done');
+    } else {
+      statusEl.textContent = `-${name} 심부름 중-`;
+      statusEl.classList.remove('hidden', 'done');
+    }
+  }
 
   // ── 설정 패널 ────────────────────────────────────────────
   const settingsBtn   = document.getElementById('settings-btn')!;
@@ -228,7 +252,7 @@ async function main() {
   });
 
   // ── 심부름 패널 ──────────────────────────────────────────
-  buildQuestList(closeAllPanels);
+  buildQuestList(() => { closeAllPanels(); updateQuestStatus(); setQuestActive(true); });
 
   document.getElementById('quest-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -243,11 +267,13 @@ async function main() {
   document.getElementById('quest-collect-btn')!.addEventListener('click', () => {
     const exp = collectQuest();
     if (exp > 0) showBubble(`+${exp} EXP 획득!`, 2000);
+    setQuestActive(false);
     closeAllPanels();
   });
 
   document.getElementById('quest-cancel-btn')!.addEventListener('click', () => {
     cancelQuest();
+    setQuestActive(false);
     updateQuestPanel();
   });
 
@@ -276,7 +302,7 @@ async function main() {
     settingsBtn.classList.add('open');
   });
 
-  // ── 코디 패널 (스킨 + 악세서리) ─────────────────────────
+  // ── 코디 패널 (스킨 + 얼굴/몸통 스타일) ─────────────────
   function buildCoordPanel() {
     // 스킨
     const skinListEl = document.getElementById('skin-list')!;
@@ -295,49 +321,51 @@ async function main() {
       skinListEl.appendChild(item);
     });
 
-    // 악세서리 슬롯
-    (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
-      const listEl = document.getElementById(`acc-${slot}-list`)!;
-      listEl.innerHTML = '';
-
-      const noneBtn = document.createElement('button');
-      noneBtn.className = 'acc-item none-item';
-      noneBtn.dataset.slot = slot;
-      noneBtn.dataset.accId = '';
-      noneBtn.textContent = '없음';
-      noneBtn.addEventListener('click', () => equipAcc(slot, null));
-      listEl.appendChild(noneBtn);
-
-      getSlotItems(slot).forEach(acc => {
-        const btn = document.createElement('button');
-        btn.className = 'acc-item';
-        btn.dataset.slot = slot;
-        btn.dataset.accId = acc.id;
-        btn.textContent = acc.emoji;
-        btn.title = acc.name;
-        btn.addEventListener('click', () => equipAcc(slot, acc.id));
-        listEl.appendChild(btn);
-      });
+    // 얼굴 스타일
+    const faceListEl = document.getElementById('face-style-list')!;
+    faceListEl.innerHTML = '';
+    const noneBtn = document.createElement('button');
+    noneBtn.className = 'acc-item none-item';
+    noneBtn.dataset.styleKind = 'face';
+    noneBtn.dataset.styleId = '';
+    noneBtn.textContent = '없음';
+    noneBtn.addEventListener('click', async () => { await setFaceStyle(null); syncStyleButtons(); });
+    faceListEl.appendChild(noneBtn);
+    FACE_STYLES.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'acc-item';
+      btn.dataset.styleKind = 'face';
+      btn.dataset.styleId = s.id;
+      btn.textContent = s.emoji;
+      btn.title = s.name;
+      btn.addEventListener('click', async () => { await setFaceStyle(s.id); syncStyleButtons(); });
+      faceListEl.appendChild(btn);
     });
 
-    syncAccButtons();
+    // 몸통 스타일
+    const bodyListEl = document.getElementById('body-style-list')!;
+    bodyListEl.innerHTML = '';
+    BODY_STYLES.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'acc-item';
+      btn.dataset.styleKind = 'body';
+      btn.dataset.styleId = s.id;
+      btn.textContent = s.emoji;
+      btn.title = s.name;
+      btn.addEventListener('click', async () => { await setBodyStyle(s.id); syncStyleButtons(); });
+      bodyListEl.appendChild(btn);
+    });
+
+    syncStyleButtons();
   }
 
-  async function equipAcc(slot: AccessorySlot, id: string | null) {
-    await setAccessory(slot, id);
-    syncAccButtons();
-  }
-
-  function syncAccButtons() {
-    const overlayEl = document.getElementById('accessory-overlay');
-    if (!overlayEl) return;
-    (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
-      const current = (document.getElementById(`acc-${slot}`) as HTMLElement)?.textContent ?? '';
-      const currentDef = ACCESSORY_LIST.find(a => a.emoji === current && a.slot === slot);
-      document.querySelectorAll<HTMLElement>(`[data-slot="${slot}"]`).forEach(btn => {
-        const isActive = currentDef ? btn.dataset.accId === currentDef.id : btn.dataset.accId === '';
-        btn.classList.toggle('active', isActive);
-      });
+  function syncStyleButtons() {
+    const face = getFaceStyle() ?? '';
+    const body = getBodyStyle();
+    document.querySelectorAll<HTMLElement>('[data-style-kind]').forEach(btn => {
+      const kind = btn.dataset.styleKind!;
+      const id = btn.dataset.styleId!;
+      btn.classList.toggle('active', kind === 'face' ? id === face : id === body);
     });
   }
 
