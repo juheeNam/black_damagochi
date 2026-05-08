@@ -395,6 +395,7 @@ async function main() {
 
     if (questAccum >= 1000) {
       questAccum = 0;
+      updateQuestStatus();
       if (quest && isComplete(quest)) {
         if (!questCompleteNotified) {
           questCompleteNotified = true;
