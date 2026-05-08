@@ -24,8 +24,33 @@ import { SKIN_LIST } from './skins';
 import { HEAD_STYLES, BODY_STYLES } from './accessories';
 
 const IDLE_CHATTER = [
-  '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
-  'zzz...', '(・∀・)', '♪～', '(ˊҳˋ)',
+  '퇴근하고 싶다...',
+  '월급날 언제더라',
+  '점심 뭐 먹지',
+  '커피 한 잔 해야겠어',
+  '야근이면 어쩌지',
+  '회의가 또야?',
+  '보고서 언제 쓰지',
+  '연차 쓰고 싶다',
+  '이게 내 일 맞나',
+  '오늘도 화이팅... 일단',
+  '(눈치보는 중)',
+  '엑셀 또 튕겼어',
+  '에어컨 왜 이렇게 추워',
+  '점심시간이 제일 좋아',
+  '주말아 기다려라',
+  '칼퇴 가능할까...',
+  '왜 자꾸 나한테만',
+  '이것도 내 업무임?',
+  '(조용히 딴짓 중)',
+  '올해도 승진은 글렀나',
+  '(모니터 뒤에 숨는 중)',
+  '커피값만 해도 얼마야',
+  '차장님이 또 부르셨대',
+  '퇴사각인데',
+  '(사직서 초안 작성 중)',
+  '야 인생이 뭔가',
+  '다음 생엔 건물주로',
 ];
 
 function resolveIdle(mood: number) {
@@ -45,7 +70,8 @@ function buildQuestList(onStart: () => void) {
     `;
     item.addEventListener('click', () => {
       startQuest(q.id);
-      showBubble(`${q.name} 중...`, 3000);
+      const startMsgs = ['또 심부름이야...', '(한숨)', '알겠어요 다녀올게요', '이것도 내 일임?'];
+      showBubble(startMsgs[Math.floor(Math.random() * startMsgs.length)], 3000);
       onStart();
     });
     listEl.appendChild(item);
@@ -230,7 +256,7 @@ async function main() {
   });
   document.getElementById('quest-collect-btn')!.addEventListener('click', () => {
     const exp = collectQuest();
-    if (exp > 0) showBubble(`+${exp} EXP 획득!`, 2000);
+    if (exp > 0) { const r = ['고생했다 나 자신', '이게 다 내 월급이야', `+${exp} EXP... 쓸쓸하네`]; showBubble(r[Math.floor(Math.random() * r.length)], 2000); }
     closeAllPanels(); updateQuestStatus();
   });
   document.getElementById('quest-cancel-btn')!.addEventListener('click', () => {
@@ -343,12 +369,15 @@ async function main() {
   levelEl.textContent = `Lv.${stats.level}`;
 
   if (stats.mood > 70) {
-    setState('idle'); showBubble('(^▽^) ♪');
+    const msgs = ['오늘은 기분 좋은데?', '(기지개 켜는 중)', '이 정도면 할만해', '♪～'];
+    setState('idle'); showBubble(msgs[Math.floor(Math.random() * msgs.length)]);
   } else if (stats.mood > 40) {
-    setState('dizzy'); showBubble('(・・;)');
+    const msgs = ['야근 3일째...', '(정신줄 놓는 중)', '머리가 핑핑', '(멍...)'];
+    setState('dizzy'); showBubble(msgs[Math.floor(Math.random() * msgs.length)]);
     setTimeout(() => resolveIdle(stats.mood), 1500);
   } else {
-    setState('down'); showBubble('(；＿；)');
+    const msgs = ['퇴사각이다 진짜', '힘들다 진짜...', '(쓰러지는 중)', '한계임'];
+    setState('down'); showBubble(msgs[Math.floor(Math.random() * msgs.length)]);
     setTimeout(() => resolveIdle(stats.mood), 2000);
   }
 
@@ -380,7 +409,8 @@ async function main() {
     else if (mood > 0 && state === 'down') { setState(quest && mood > 30 ? 'quest' : mood <= 30 ? 'angry' : 'idle'); }
 
     if (mood < 20 && !moodWarned) {
-      moodWarned = true; showBubble('(；ω；) 외로워...', 3000);
+      const neglectMsgs = ['나 좀 봐줘...', '이러다 번아웃 온다', '(방치된 기분)', '외롭다 진짜'];
+      moodWarned = true; showBubble(neglectMsgs[Math.floor(Math.random() * neglectMsgs.length)], 3000);
       setState('dizzy'); setTimeout(() => resolveIdle(getStats().mood), 1500);
     } else if (mood >= 20) { moodWarned = false; }
 
