@@ -566,12 +566,15 @@ body {
 /* 심부름 상태 텍스트 */
 .quest-status {
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.65);
+  color: #fff;
   text-align: center;
-  margin-top: 3px;
+  margin-top: 4px;
   letter-spacing: 0.2px;
   pointer-events: none;
   white-space: nowrap;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  padding: 1px 7px;
 }
 
 .quest-status.done {
