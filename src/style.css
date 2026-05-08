@@ -577,3 +577,79 @@ body {
 .quest-status.done {
   color: #f0c040;
 }
+
+/* ── 사이드 패널 레이아웃 ── */
+#app {
+  flex-direction: row !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+
+.pet-area {
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+#side-panel {
+  width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.15s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+#side-panel.open {
+  width: 134px;
+}
+
+.side-content {
+  width: 134px;
+  height: 100%;
+  overflow-y: auto;
+  background: rgba(25, 25, 25, 0.97);
+  border-left: 1px solid #555;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.side-content.hidden { display: none !important; }
+
+/* 기존 popup-panel absolute 포지셔닝 무효화 (side-panel 안에서는 flow로) */
+#side-panel .popup-panel {
+  position: relative !important;
+  bottom: auto !important; left: auto !important;
+  right: auto !important; top: auto !important;
+  border-radius: 0 !important;
+  border: none !important;
+  max-height: none !important;
+  width: 100% !important;
+}
+
+/* 코디 패널 스타일 그리드 */
+.style-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+
+.style-btn {
+  font-size: 15px;
+  padding: 2px 3px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: none;
+  color: #ddd;
+  line-height: 1.2;
+  transition: background 0.12s;
+}
+
+.style-btn:hover { background: rgba(255,255,255,0.1); }
+.style-btn.active { border-color: #4a9eff; background: rgba(74,158,255,0.18); }

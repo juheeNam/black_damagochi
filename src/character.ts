@@ -1,59 +1,66 @@
-import { ACCESSORY_LIST } from './accessories';
-import type { AccessorySlot, EquippedAccessories } from './accessories';
+import { HEAD_STYLES, BODY_STYLES } from './accessories';
 
 export type SpriteName = 'idle' | 'angry' | 'dizzy' | 'down' | 'hit' | 'quest';
 
-const SPRITE_NAMES: SpriteName[] = ['idle', 'angry', 'dizzy', 'down', 'hit', 'quest'];
-const sprites: Record<SpriteName, HTMLImageElement> = {} as Record<SpriteName, HTMLImageElement>;
-const accSprites: Record<string, HTMLImageElement> = {};
+const STATE_SPRITES = ['angry', 'dizzy', 'down', 'hit'] as const;
+const stateImgs: Record<string, HTMLImageElement> = {};
+const headImgs:  Record<string, HTMLImageElement> = {};
+const bodyImgs:  Record<string, HTMLImageElement> = {};
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 let currentSprite: SpriteName = 'idle';
-let equippedAcc: EquippedAccessories = { top: null, face: null, neck: null };
+let currentHead = 'sunglasses';
+let currentBody = 'no_tie';
 
 export function initCharacter(canvasEl: HTMLCanvasElement) {
   canvas = canvasEl;
   ctx = canvas.getContext('2d')!;
 
-  for (const name of SPRITE_NAMES) {
+  for (const name of STATE_SPRITES) {
     const img = new Image();
     img.src = `/sprites/${name}.png`;
-    sprites[name] = img;
+    stateImgs[name] = img;
   }
-
-  for (const acc of ACCESSORY_LIST) {
+  for (const hs of HEAD_STYLES) {
     const img = new Image();
-    img.src = `/sprites/acc_${acc.id}.png`;
-    accSprites[acc.id] = img;
+    img.src = `/sprites/head_${hs.id}.png`;
+    headImgs[hs.id] = img;
   }
+  for (const bs of BODY_STYLES) {
+    const img = new Image();
+    img.src = `/sprites/body_${bs.id}.png`;
+    bodyImgs[bs.id] = img;
+  }
+  const questBody = new Image();
+  questBody.src = '/sprites/body_quest.png';
+  bodyImgs['quest'] = questBody;
 }
 
-export function setEquippedAccessories(acc: EquippedAccessories) {
-  equippedAcc = { ...acc };
-}
+export function setHeadStyle(id: string) { currentHead = id; }
+export function setBodyStyle(id: string) { currentBody = id; }
+export function getHeadStyle() { return currentHead; }
+export function getBodyStyle() { return currentBody; }
 
 export function setState(state: SpriteName) {
   currentSprite = state;
-  canvas.classList.toggle('idle', state === 'idle');
+  canvas.classList.toggle('idle', state === 'idle' || state === 'quest');
 }
 
-export function getState(): SpriteName {
-  return currentSprite;
-}
+export function getState(): SpriteName { return currentSprite; }
 
 export function renderFrame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const img = sprites[currentSprite];
-  if (img?.complete && img.naturalWidth > 0) {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  }
-  for (const slot of ['top', 'face', 'neck'] as AccessorySlot[]) {
-    const id = equippedAcc[slot];
-    if (!id) continue;
-    const accImg = accSprites[id];
-    if (accImg?.complete && accImg.naturalWidth > 0) {
-      ctx.drawImage(accImg, 0, 0, canvas.width, canvas.height);
-    }
+  const cw = canvas.width, ch = canvas.height;
+
+  if (currentSprite === 'idle' || currentSprite === 'quest') {
+    const bodyKey = currentSprite === 'quest' ? 'quest' : currentBody;
+    const bImg = bodyImgs[bodyKey] ?? bodyImgs[currentBody];
+    if (bImg?.complete && bImg.naturalWidth > 0) ctx.drawImage(bImg, 0, 0, cw, ch);
+    const hImg = headImgs[currentHead];
+    if (hImg?.complete && hImg.naturalWidth > 0) ctx.drawImage(hImg, 0, 0, cw, ch);
+  } else {
+    const sImg = stateImgs[currentSprite];
+    if (sImg?.complete && sImg.naturalWidth > 0) ctx.drawImage(sImg, 0, 0, cw, ch);
   }
 }

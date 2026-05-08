@@ -14,110 +14,116 @@
         <span class="item-indicator-label">던지기 모드</span>
       </div>
       <button id="mini-restore-btn" title="펼치기">▲</button>
-      <div id="settings-panel" class="hidden">
-        <button class="panel-back-btn" id="settings-close-btn">× 닫기</button>
-        <div class="settings-row">
-          <span class="settings-label">크기</span>
-          <button data-size="small">S</button>
-          <button data-size="medium">M</button>
-          <button data-size="large">L</button>
-        </div>
-        <div class="settings-row">
-          <span class="settings-label">투명</span>
-          <button data-opacity="low">낮음</button>
-          <button data-opacity="normal">보통</button>
-        </div>
-        <div class="settings-row settings-actions">
-          <button id="hide-btn">숨기기</button>
-          <button id="dnd-btn">방해금지</button>
-        </div>
-        <div class="settings-row settings-actions">
-          <button id="quest-btn">📋 심부름</button>
-          <button id="skill-btn">⚡ 스킬</button>
-        </div>
-        <div class="settings-row settings-actions">
-          <button id="notif-btn">🔔 알림</button>
-          <button id="coord-btn">🎨 코디</button>
-        </div>
-        <div class="settings-row settings-actions">
-          <button id="reset-btn">🗑 초기화</button>
-        </div>
-        <div class="settings-row">
-          <span class="settings-label">🔊</span>
-          <input type="range" id="sound-range" min="0" max="100" value="50" class="sound-slider">
-        </div>
-      </div>
+
+      <!-- 캐릭터 영역 -->
       <div class="pet-area">
-      <div id="bubble" class="bubble hidden"></div>
-      <div class="sprite-wrap">
-        <canvas id="sprite" width="20" height="20"></canvas>
-      </div>
-      <div id="quest-status" class="quest-status hidden"></div>
-      <div class="gauges">
-        <div class="gauge-row">
-          <span class="gauge-label">♥</span>
-          <div class="gauge-wrap"><div id="mood-bar" class="gauge-bar"></div></div>
-          <button id="settings-btn" title="설정">⚙</button>
+        <div id="bubble" class="bubble hidden"></div>
+        <div class="sprite-wrap">
+          <canvas id="sprite" width="20" height="20"></canvas>
         </div>
-        <div class="gauge-row">
-          <span class="gauge-label">⭐</span>
-          <div class="gauge-wrap"><div id="exp-bar" class="gauge-bar exp"></div></div>
-          <span id="level-display" class="level-text">Lv.1</span>
-        </div>
-      </div>
-      </div><!-- /.pet-area -->
-
-      <!-- 심부름 팝업 -->
-      <div id="quest-panel" class="popup-panel hidden">
-        <button class="panel-back-btn" id="quest-back-btn">← 닫기</button>
-        <div id="quest-list">
-          <div class="popup-title">📋 심부름</div>
-        </div>
-        <div id="quest-progress" class="hidden">
-          <div class="popup-title">진행 중</div>
-          <div id="quest-name" class="quest-active-name"></div>
-          <div class="gauge-wrap quest-progress-wrap">
-            <div id="quest-progress-bar" class="gauge-bar" style="background:#f0a500"></div>
+        <div id="quest-status" class="quest-status hidden"></div>
+        <div class="gauges">
+          <div class="gauge-row">
+            <span class="gauge-label">♥</span>
+            <div class="gauge-wrap"><div id="mood-bar" class="gauge-bar"></div></div>
+            <button id="settings-btn" title="설정">⚙</button>
           </div>
-          <div id="quest-time" class="quest-time"></div>
+          <div class="gauge-row">
+            <span class="gauge-label">⭐</span>
+            <div class="gauge-wrap"><div id="exp-bar" class="gauge-bar exp"></div></div>
+            <span id="level-display" class="level-text">Lv.1</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오른쪽 사이드 패널 -->
+      <div id="side-panel">
+
+        <!-- 설정 패널 -->
+        <div id="settings-panel" class="side-content hidden">
+          <button class="panel-back-btn" id="settings-close-btn">× 닫기</button>
+          <div class="settings-row">
+            <span class="settings-label">크기</span>
+            <button data-size="small">S</button>
+            <button data-size="medium">M</button>
+            <button data-size="large">L</button>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">투명</span>
+            <button data-opacity="low">낮음</button>
+            <button data-opacity="normal">보통</button>
+          </div>
+          <div class="settings-row settings-actions">
+            <button id="hide-btn">숨기기</button>
+            <button id="dnd-btn">방해금지</button>
+          </div>
+          <div class="settings-row settings-actions">
+            <button id="quest-btn">📋 심부름</button>
+            <button id="skill-btn">⚡ 스킬</button>
+          </div>
+          <div class="settings-row settings-actions">
+            <button id="notif-btn">🔔 알림</button>
+            <button id="coord-btn">🎨 코디</button>
+          </div>
+          <div class="settings-row settings-actions">
+            <button id="reset-btn">🗑 초기화</button>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">🔊</span>
+            <input type="range" id="sound-range" min="0" max="100" value="50" class="sound-slider">
+          </div>
+        </div>
+
+        <!-- 심부름 패널 -->
+        <div id="quest-panel" class="side-content hidden">
+          <button class="panel-back-btn" id="quest-back-btn">← 닫기</button>
+          <div id="quest-list">
+            <div class="popup-title">📋 심부름</div>
+          </div>
+          <div id="quest-progress" class="hidden">
+            <div class="popup-title">진행 중</div>
+            <div id="quest-name" class="quest-active-name"></div>
+            <div class="gauge-wrap quest-progress-wrap">
+              <div id="quest-progress-bar" class="gauge-bar" style="background:#f0a500"></div>
+            </div>
+            <div id="quest-time" class="quest-time"></div>
+            <div class="quest-actions">
+              <button id="quest-collect-btn" class="hidden">수령하기 ✓</button>
+              <button id="quest-cancel-btn">취소</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 스킬 패널 -->
+        <div id="skill-panel" class="side-content hidden">
+          <button class="panel-back-btn" id="skill-back-btn">← 닫기</button>
+          <div class="popup-title">⚡ 스킬</div>
+          <div id="skill-list"></div>
+        </div>
+
+        <!-- 코디 패널 -->
+        <div id="coord-panel" class="side-content hidden">
+          <button class="panel-back-btn" id="coord-back-btn">← 닫기</button>
+          <div class="popup-title">🎨 코디</div>
+          <div class="coord-section-title">스킨</div>
+          <div id="skin-list"></div>
+          <div class="coord-section-title">얼굴</div>
+          <div id="head-style-list" class="style-grid"></div>
+          <div class="coord-section-title">바디</div>
+          <div id="body-style-list" class="style-grid"></div>
+        </div>
+
+        <!-- 초기화 확인 -->
+        <div id="reset-confirm" class="side-content hidden">
+          <div class="popup-title">⚠ 데이터 초기화</div>
+          <div class="reset-msg">되돌릴 수 없습니다. 초기화할까요?</div>
           <div class="quest-actions">
-            <button id="quest-collect-btn" class="hidden">수령하기 ✓</button>
-            <button id="quest-cancel-btn">취소</button>
+            <button id="reset-ok-btn">확인</button>
+            <button id="reset-cancel-btn">취소</button>
           </div>
         </div>
-      </div>
 
-      <!-- 스킬 팝업 -->
-      <div id="skill-panel" class="popup-panel hidden">
-        <button class="panel-back-btn" id="skill-back-btn">← 닫기</button>
-        <div class="popup-title">⚡ 스킬</div>
-        <div id="skill-list"></div>
-      </div>
-
-      <!-- 코디 팝업 (스킨 + 악세서리 통합) -->
-      <div id="coord-panel" class="popup-panel hidden">
-        <button class="panel-back-btn" id="coord-back-btn">← 닫기</button>
-        <div class="popup-title">🎨 코디</div>
-        <div class="coord-section-title">스킨</div>
-        <div id="skin-list"></div>
-        <div class="coord-section-title">악세서리</div>
-        <div class="acc-slot-label">모자</div>
-        <div id="acc-top-list"  class="acc-slot-list"></div>
-        <div class="acc-slot-label">얼굴</div>
-        <div id="acc-face-list" class="acc-slot-list"></div>
-        <div class="acc-slot-label">목</div>
-        <div id="acc-neck-list" class="acc-slot-list"></div>
-      </div>
-
-      <!-- 초기화 확인 팝업 -->
-      <div id="reset-confirm" class="popup-panel hidden">
-        <div class="popup-title">⚠ 데이터 초기화</div>
-        <div class="reset-msg">되돌릴 수 없습니다. 초기화할까요?</div>
-        <div class="quest-actions">
-          <button id="reset-ok-btn">확인</button>
-          <button id="reset-cancel-btn">취소</button>
-        </div>
-      </div>
-    </div>
+      </div><!-- /#side-panel -->
+    </div><!-- /#app -->
   </body>
 </html>
