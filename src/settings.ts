@@ -19,7 +19,7 @@ const SPRITE_SIZE_MAP: Record<SizePreset, number> = { small:60, medium:80, large
 const OPACITY_MAP: Record<OpacityPreset, number>  = { low:0.4, normal:1.0, high:1.0 };
 const BUBBLE_FONT_MAP: Record<SizePreset, string>  = { small:'10px', medium:'12px', large:'14px' };
 
-export const PANEL_WIDTH = 134;
+export const PANEL_WIDTH = 180;
 
 let currentDnd = false;
 let isMinimized = false;
