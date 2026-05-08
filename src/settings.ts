@@ -5,8 +5,8 @@ import { setNotifEnabled, isNotifEnabled } from './notifications';
 import { applySkin } from './skins';
 import type { SkinId } from './skins';
 import { initSound, setSoundVolume } from './sounds';
-import { ACCESSORY_LIST } from './accessories';
 import type { AccessorySlot, EquippedAccessories } from './accessories';
+import { setEquippedAccessories } from './character';
 
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
@@ -162,18 +162,20 @@ export async function setSoundSetting(vol: number) {
   if (store) await store.set('sound', vol);
 }
 
+let currentEquipped: EquippedAccessories = { top: null, face: null, neck: null };
+
 function applyAccessories(equipped: EquippedAccessories) {
-  (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
-    const el = document.getElementById(`acc-${slot}`);
-    const def = equipped[slot] ? ACCESSORY_LIST.find(a => a.id === equipped[slot]) : null;
-    if (el) el.textContent = def?.emoji ?? '';
-  });
+  currentEquipped = { ...equipped };
+  setEquippedAccessories(equipped);
+}
+
+export function getEquippedAccessories(): EquippedAccessories {
+  return { ...currentEquipped };
 }
 
 export async function setAccessory(slot: AccessorySlot, id: string | null) {
-  const el = document.getElementById(`acc-${slot}`);
-  const def = id ? ACCESSORY_LIST.find(a => a.id === id) : null;
-  if (el) el.textContent = def?.emoji ?? '';
+  currentEquipped = { ...currentEquipped, [slot]: id };
+  setEquippedAccessories(currentEquipped);
   if (store) await store.set(`equip_${slot}`, id);
 }
 

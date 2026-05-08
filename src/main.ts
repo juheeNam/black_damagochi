@@ -6,7 +6,7 @@ import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill, r
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setAccessory } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setAccessory, getEquippedAccessories } from './settings';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
@@ -16,7 +16,7 @@ import { notify } from './notifications';
 import { getLastInteractionTime } from './interactions';
 import { playLevelUp } from './sounds';
 import { SKIN_LIST } from './skins';
-import { ACCESSORY_LIST, getSlotItems } from './accessories';
+import { getSlotItems } from './accessories';
 import type { AccessorySlot } from './accessories';
 
 const IDLE_CHATTER = [
@@ -354,14 +354,11 @@ async function main() {
   }
 
   function syncAccButtons() {
-    const overlayEl = document.getElementById('accessory-overlay');
-    if (!overlayEl) return;
+    const equipped = getEquippedAccessories();
     (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
-      const current = (document.getElementById(`acc-${slot}`) as HTMLElement)?.textContent ?? '';
-      const currentDef = ACCESSORY_LIST.find(a => a.emoji === current && a.slot === slot);
+      const currentId = equipped[slot] ?? '';
       document.querySelectorAll<HTMLElement>(`[data-slot="${slot}"]`).forEach(btn => {
-        const isActive = currentDef ? btn.dataset.accId === currentDef.id : btn.dataset.accId === '';
-        btn.classList.toggle('active', isActive);
+        btn.classList.toggle('active', btn.dataset.accId === currentId);
       });
     });
   }
@@ -452,10 +449,19 @@ async function main() {
     renderFrame();
 
     const state = getState();
-    if (mood <= 0)                        setState('down');
-    else if (mood <= 30 && state === 'idle')  setState('angry');
-    else if (mood >  30 && state === 'angry') setState('idle');
-    else if (mood >  0  && state === 'down')  setState(mood <= 30 ? 'angry' : 'idle');
+    if (mood <= 0) {
+      setState('down');
+    } else if (quest && mood > 30 && (state === 'idle' || state === 'angry')) {
+      setState('quest');
+    } else if (!quest && state === 'quest') {
+      setState(mood <= 30 ? 'angry' : 'idle');
+    } else if (mood <= 30 && (state === 'idle' || state === 'quest')) {
+      setState('angry');
+    } else if (mood >  30 && state === 'angry') {
+      setState('idle');
+    } else if (mood >  0  && state === 'down') {
+      setState(quest && mood > 30 ? 'quest' : mood <= 30 ? 'angry' : 'idle');
+    }
 
 
     if (mood < 20 && !moodWarned) {
