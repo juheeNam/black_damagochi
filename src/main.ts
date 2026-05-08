@@ -112,6 +112,7 @@ async function main() {
   initInteractions(canvas);
 
   await initSettings();
+  updateQuestStatus();
 
   // ── 레벨업 콜백 등록 ─────────────────────────────────────
   onLevelUp((newLevel) => {
@@ -132,6 +133,28 @@ async function main() {
   });
 
   // ── 설정 패널 ────────────────────────────────────────────
+  function updateQuestStatus() {
+    const statusEl = document.getElementById('quest-status');
+    if (!statusEl) return;
+    const { quest } = getStats();
+    if (!quest) {
+      statusEl.textContent = '';
+      statusEl.classList.add('hidden');
+      statusEl.classList.remove('done');
+      return;
+    }
+    const def = getQuestDef(quest.id);
+    const name = def?.name ?? '';
+    if (isComplete(quest)) {
+      statusEl.textContent = `-${name} 심부름 완료!-`;
+      statusEl.classList.remove('hidden');
+      statusEl.classList.add('done');
+    } else {
+      statusEl.textContent = `-${name} 심부름 중-`;
+      statusEl.classList.remove('hidden', 'done');
+    }
+  }
+
   const settingsBtn   = document.getElementById('settings-btn')!;
   const settingsPanel = document.getElementById('settings-panel')!;
   const questPanel    = document.getElementById('quest-panel')!;
@@ -228,7 +251,7 @@ async function main() {
   });
 
   // ── 심부름 패널 ──────────────────────────────────────────
-  buildQuestList(closeAllPanels);
+  buildQuestList(() => { closeAllPanels(); updateQuestStatus(); });
 
   document.getElementById('quest-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -244,11 +267,13 @@ async function main() {
     const exp = collectQuest();
     if (exp > 0) showBubble(`+${exp} EXP 획득!`, 2000);
     closeAllPanels();
+    updateQuestStatus();
   });
 
   document.getElementById('quest-cancel-btn')!.addEventListener('click', () => {
     cancelQuest();
     updateQuestPanel();
+    updateQuestStatus();
   });
 
   document.getElementById('quest-back-btn')!.addEventListener('click', (e) => {
@@ -432,8 +457,6 @@ async function main() {
     else if (mood >  30 && state === 'angry') setState('idle');
     else if (mood >  0  && state === 'down')  setState(mood <= 30 ? 'angry' : 'idle');
 
-    const badgeEl = document.getElementById('acc-badge');
-    if (badgeEl) badgeEl.classList.toggle('hidden', !quest);
 
     if (mood < 20 && !moodWarned) {
       moodWarned = true;
@@ -473,6 +496,7 @@ async function main() {
           }
           const questBtnEl = document.getElementById('quest-btn');
           if (questBtnEl) questBtnEl.textContent = '📋 심부름 ●';
+          updateQuestStatus();
         }
       } else if (!quest) {
         questCompleteNotified = false;
