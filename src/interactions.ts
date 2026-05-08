@@ -4,6 +4,7 @@ import { adjustMood, gainExp, getStats } from './stats';
 import { isUnlocked } from './skills';
 import { showBubble } from './bubble';
 import { getSelectedItem, executeThrow } from './throw';
+import { playHit, playDrag, playFeed, playThrowHit } from './sounds';
 
 const HURT_MESSAGES = [
   '(x_x) 아파요...',
@@ -113,6 +114,7 @@ export function initInteractions(spriteEl: HTMLElement) {
         setState('dizzy');
         renderFrame();
         adjustMood(-5);
+        playDrag();
         showBubble(pick(DRAG_MESSAGES));
         cleanup();
 
@@ -182,6 +184,7 @@ function handleClick(e: MouseEvent) {
     const result = executeThrow();
     if (result) {
       if (result.hit) {
+        playThrowHit();
         setState('hit');
         adjustMood(result.def.moodDelta);
         gainExp(result.def.exp);
@@ -226,6 +229,7 @@ function handleClick(e: MouseEvent) {
   }
 
   const nerveBonus = isUnlocked('nerve') ? 1 : 0;
+  playHit();
   setState('hit');
   adjustMood(moodDelta - nerveBonus);
   gainExp(2);
@@ -235,6 +239,7 @@ function handleClick(e: MouseEvent) {
 
 function handleFeed(e: MouseEvent) {
   e.preventDefault();
+  playFeed();
   adjustMood(30);
   gainExp(1);
   setState('hit');

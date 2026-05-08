@@ -2,6 +2,9 @@ import { getCurrentWindow, LogicalSize } from '@tauri-apps/api/window';
 import { load } from '@tauri-apps/plugin-store';
 import { setBubbleDnd } from './bubble';
 import { setNotifEnabled, isNotifEnabled } from './notifications';
+import { applySkin } from './skins';
+import type { SkinId } from './skins';
+import { initSound, setSoundVolume } from './sounds';
 
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
@@ -36,17 +39,24 @@ export async function initSettings() {
   const opacity = (await store.get<OpacityPreset>('opacity')) ?? 'normal';
   const dnd     = (await store.get<boolean>('dnd'))        ?? false;
 
-  const notif = (await store.get<boolean>('notif')) ?? true;
+  const notif  = (await store.get<boolean>('notif'))  ?? true;
+  const sound  = (await store.get<number>('sound'))   ?? 0.5;
+  const skin   = (await store.get<SkinId>('skin'))    ?? 'default';
 
   await applySize(size);
   applyOpacity(opacity);
   if (dnd) await applyDnd(true);
   setNotifEnabled(notif);
+  initSound(sound);
+  applySkin(skin);
 
   syncSizeButtons(size);
   syncOpacityButtons(opacity);
   if (dnd) document.getElementById('app')?.classList.add('dnd-active');
   document.getElementById('notif-btn')?.classList.toggle('active', notif);
+
+  const soundRange = document.getElementById('sound-range') as HTMLInputElement | null;
+  if (soundRange) soundRange.value = String(Math.round(sound * 100));
 }
 
 const BUBBLE_FONT_MAP: Record<SizePreset, string> = {
@@ -126,6 +136,16 @@ export async function toggleDoNotDisturb() {
 
 export function isDoNotDisturb() {
   return currentDnd;
+}
+
+export async function setSoundSetting(vol: number) {
+  setSoundVolume(vol);
+  if (store) await store.set('sound', vol);
+}
+
+export async function setSkin(id: SkinId) {
+  applySkin(id);
+  if (store) await store.set('skin', id);
 }
 
 export async function setNotif(val: boolean) {

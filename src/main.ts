@@ -6,13 +6,15 @@ import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill, r
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin } from './settings';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
 import { QUEST_LIST, startQuest, collectQuest, cancelQuest, getProgress, isComplete, formatRemaining, getQuestDef } from './quests';
 import { selectItem, cancelSelection } from './throw';
 import { notify } from './notifications';
+import { playLevelUp } from './sounds';
+import { SKIN_LIST } from './skins';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -110,6 +112,7 @@ async function main() {
 
   // ── 레벨업 콜백 등록 ─────────────────────────────────────
   onLevelUp((newLevel) => {
+    playLevelUp();
     showBubble(`★ 레벨 업! Lv.${newLevel}`, 3000);
     notify('★ 레벨 업!', `Lv.${newLevel} 달성`);
     setState('hit');
@@ -130,12 +133,14 @@ async function main() {
   const settingsPanel = document.getElementById('settings-panel')!;
   const questPanel    = document.getElementById('quest-panel')!;
   const skillPanel    = document.getElementById('skill-panel')!;
+  const skinPanel     = document.getElementById('skin-panel')!;
   const resetConfirm  = document.getElementById('reset-confirm')!;
 
   function closeAllPanels() {
     settingsPanel.classList.add('hidden');
     questPanel.classList.add('hidden');
     skillPanel.classList.add('hidden');
+    skinPanel.classList.add('hidden');
     resetConfirm.classList.add('hidden');
     settingsBtn.classList.remove('open');
   }
@@ -154,6 +159,7 @@ async function main() {
   settingsPanel.addEventListener('click', (e) => e.stopPropagation());
   questPanel.addEventListener('click', (e) => e.stopPropagation());
   skillPanel.addEventListener('click', (e) => e.stopPropagation());
+  skinPanel.addEventListener('click', (e) => e.stopPropagation());
   resetConfirm.addEventListener('click', (e) => e.stopPropagation());
 
   document.querySelectorAll<HTMLElement>('[data-size]').forEach(btn => {
@@ -265,6 +271,48 @@ async function main() {
     skillPanel.classList.add('hidden');
     settingsPanel.classList.remove('hidden');
     settingsBtn.classList.add('open');
+  });
+
+  // ── 스킨 패널 ────────────────────────────────────────────
+  function buildSkinPanel() {
+    const listEl = document.getElementById('skin-list')!;
+    listEl.innerHTML = '';
+    SKIN_LIST.forEach(skin => {
+      const item = document.createElement('div');
+      item.className = 'skin-item';
+      item.dataset.skinId = skin.id;
+      item.textContent = skin.name;
+      item.addEventListener('click', async () => {
+        await setSkin(skin.id as Parameters<typeof setSkin>[0]);
+        document.querySelectorAll<HTMLElement>('.skin-item').forEach(el => {
+          el.classList.toggle('active', el.dataset.skinId === skin.id);
+        });
+      });
+      listEl.appendChild(item);
+    });
+  }
+
+  document.getElementById('skin-btn')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = !skinPanel.classList.contains('hidden');
+    closeAllPanels();
+    if (!open) {
+      buildSkinPanel();
+      skinPanel.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('skin-back-btn')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    skinPanel.classList.add('hidden');
+    settingsPanel.classList.remove('hidden');
+    settingsBtn.classList.add('open');
+  });
+
+  // ── 볼륨 슬라이더 ────────────────────────────────────────
+  document.getElementById('sound-range')!.addEventListener('input', (e) => {
+    const val = Number((e.target as HTMLInputElement).value) / 100;
+    setSoundSetting(val);
   });
 
   // ── 단축키 ───────────────────────────────────────────────
