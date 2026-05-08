@@ -37,7 +37,14 @@
         </div>
         <div class="settings-row settings-actions">
           <button id="notif-btn">🔔 알림</button>
+          <button id="skin-btn">👔 스킨</button>
+        </div>
+        <div class="settings-row settings-actions">
           <button id="reset-btn">🗑 초기화</button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">🔊</span>
+          <input type="range" id="sound-range" min="0" max="100" value="50" class="sound-slider">
         </div>
       </div>
       <div class="pet-area">
@@ -82,6 +89,13 @@
         <button class="panel-back-btn" id="skill-back-btn">← 닫기</button>
         <div class="popup-title">⚡ 스킬</div>
         <div id="skill-list"></div>
+      </div>
+
+      <!-- 스킨 팝업 -->
+      <div id="skin-panel" class="popup-panel hidden">
+        <button class="panel-back-btn" id="skin-back-btn">← 닫기</button>
+        <div class="popup-title">👔 스킨</div>
+        <div id="skin-list"></div>
       </div>
 
       <!-- 초기화 확인 팝업 -->

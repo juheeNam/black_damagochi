@@ -472,3 +472,30 @@ body {
 #app.minimized #mini-restore-btn {
   display: flex;
 }
+
+.sound-slider {
+  flex: 1;
+  accent-color: #4a9eff;
+  height: 4px;
+  cursor: pointer;
+}
+
+.skin-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #eee;
+}
+
+.skin-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skin-item.active {
+  background: rgba(74, 158, 255, 0.2);
+  color: #4a9eff;
+}
