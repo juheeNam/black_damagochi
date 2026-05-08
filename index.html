@@ -37,7 +37,7 @@
         </div>
         <div class="settings-row settings-actions">
           <button id="notif-btn">🔔 알림</button>
-          <button id="skin-btn">👔 스킨</button>
+          <button id="coord-btn">🎨 코디</button>
         </div>
         <div class="settings-row settings-actions">
           <button id="reset-btn">🗑 초기화</button>
@@ -49,7 +49,15 @@
       </div>
       <div class="pet-area">
       <div id="bubble" class="bubble hidden"></div>
-      <canvas id="sprite" width="20" height="20"></canvas>
+      <div class="sprite-wrap">
+        <canvas id="sprite" width="20" height="20"></canvas>
+        <div id="accessory-overlay" class="accessory-overlay">
+          <span id="acc-top"   class="acc acc-top"></span>
+          <span id="acc-face"  class="acc acc-face"></span>
+          <span id="acc-neck"  class="acc acc-neck"></span>
+          <span id="acc-badge" class="acc acc-badge hidden">📋</span>
+        </div>
+      </div>
       <div class="gauges">
         <div class="gauge-row">
           <span class="gauge-label">♥</span>
@@ -91,11 +99,19 @@
         <div id="skill-list"></div>
       </div>
 
-      <!-- 스킨 팝업 -->
-      <div id="skin-panel" class="popup-panel hidden">
-        <button class="panel-back-btn" id="skin-back-btn">← 닫기</button>
-        <div class="popup-title">👔 스킨</div>
+      <!-- 코디 팝업 (스킨 + 악세서리 통합) -->
+      <div id="coord-panel" class="popup-panel hidden">
+        <button class="panel-back-btn" id="coord-back-btn">← 닫기</button>
+        <div class="popup-title">🎨 코디</div>
+        <div class="coord-section-title">스킨</div>
         <div id="skin-list"></div>
+        <div class="coord-section-title">악세서리</div>
+        <div class="acc-slot-label">모자</div>
+        <div id="acc-top-list"  class="acc-slot-list"></div>
+        <div class="acc-slot-label">얼굴</div>
+        <div id="acc-face-list" class="acc-slot-list"></div>
+        <div class="acc-slot-label">목</div>
+        <div id="acc-neck-list" class="acc-slot-list"></div>
       </div>
 
       <!-- 초기화 확인 팝업 -->
