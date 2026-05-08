@@ -5,8 +5,7 @@ import { setNotifEnabled, isNotifEnabled } from './notifications';
 import { applySkin } from './skins';
 import type { SkinId } from './skins';
 import { initSound, setSoundVolume } from './sounds';
-import type { AccessorySlot, EquippedAccessories } from './accessories';
-import { setEquippedAccessories } from './character';
+import { setCharacterFaceStyle, setCharacterBodyStyle } from './character';
 
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
@@ -23,10 +22,10 @@ const SPRITE_SIZE_MAP: Record<SizePreset, number> = {
   large:  110,
 };
 
-const ACC_FONT_MAP: Record<SizePreset, string> = {
-  small:  '11px',
-  medium: '14px',
-  large:  '19px',
+const BUBBLE_FONT_MAP: Record<SizePreset, string> = {
+  small:  '10px',
+  medium: '12px',
+  large:  '14px',
 };
 
 const OPACITY_MAP: Record<OpacityPreset, number> = {
@@ -40,22 +39,21 @@ let isMinimized = false;
 let savedSizePreset: SizePreset = 'medium';
 let store: Awaited<ReturnType<typeof load>> | null = null;
 
+let currentFaceStyle: string | null = null;
+let currentBodyStyle: string = 'normal';
+
 export async function initSettings() {
   store = await load('settings.json');
 
-  const size    = (await store.get<SizePreset>('size'))    ?? 'medium';
+  const size    = (await store.get<SizePreset>('size'))       ?? 'medium';
   const opacity = (await store.get<OpacityPreset>('opacity')) ?? 'normal';
-  const dnd     = (await store.get<boolean>('dnd'))        ?? false;
+  const dnd     = (await store.get<boolean>('dnd'))           ?? false;
+  const notif   = (await store.get<boolean>('notif'))         ?? true;
+  const sound   = (await store.get<number>('sound'))          ?? 0.5;
+  const skin    = (await store.get<SkinId>('skin'))           ?? 'default';
 
-  const notif  = (await store.get<boolean>('notif'))  ?? true;
-  const sound  = (await store.get<number>('sound'))   ?? 0.5;
-  const skin   = (await store.get<SkinId>('skin'))    ?? 'default';
-
-  const equipped: EquippedAccessories = {
-    top:  (await store.get<string | null>('equip_top'))  ?? null,
-    face: (await store.get<string | null>('equip_face')) ?? null,
-    neck: (await store.get<string | null>('equip_neck')) ?? null,
-  };
+  const faceStyle = (await store.get<string | null>('face_style')) ?? null;
+  const bodyStyle = (await store.get<string>('body_style'))        ?? 'normal';
 
   await applySize(size);
   applyOpacity(opacity);
@@ -63,7 +61,11 @@ export async function initSettings() {
   setNotifEnabled(notif);
   initSound(sound);
   applySkin(skin);
-  applyAccessories(equipped);
+
+  currentFaceStyle = faceStyle;
+  currentBodyStyle = bodyStyle;
+  setCharacterFaceStyle(faceStyle);
+  setCharacterBodyStyle(bodyStyle);
 
   syncSizeButtons(size);
   syncOpacityButtons(opacity);
@@ -73,12 +75,6 @@ export async function initSettings() {
   const soundRange = document.getElementById('sound-range') as HTMLInputElement | null;
   if (soundRange) soundRange.value = String(Math.round(sound * 100));
 }
-
-const BUBBLE_FONT_MAP: Record<SizePreset, string> = {
-  small:  '10px',
-  medium: '12px',
-  large:  '14px',
-};
 
 async function applySize(preset: SizePreset) {
   savedSizePreset = preset;
@@ -96,8 +92,6 @@ async function applySize(preset: SizePreset) {
   if (wrap?.classList.contains('sprite-wrap')) { wrap.style.width = `${spriteSize}px`; wrap.style.height = `${spriteSize}px`; }
   const bubble = document.getElementById('bubble') as HTMLElement | null;
   if (bubble) bubble.style.fontSize = BUBBLE_FONT_MAP[preset];
-  const overlay = document.getElementById('accessory-overlay') as HTMLElement | null;
-  if (overlay) overlay.style.fontSize = ACC_FONT_MAP[preset];
 }
 
 function applyOpacity(preset: OpacityPreset) {
@@ -162,22 +156,20 @@ export async function setSoundSetting(vol: number) {
   if (store) await store.set('sound', vol);
 }
 
-let currentEquipped: EquippedAccessories = { top: null, face: null, neck: null };
-
-function applyAccessories(equipped: EquippedAccessories) {
-  currentEquipped = { ...equipped };
-  setEquippedAccessories(equipped);
+export async function setFaceStyle(id: string | null) {
+  currentFaceStyle = id;
+  setCharacterFaceStyle(id);
+  if (store) await store.set('face_style', id);
 }
 
-export function getEquippedAccessories(): EquippedAccessories {
-  return { ...currentEquipped };
+export async function setBodyStyle(id: string) {
+  currentBodyStyle = id;
+  setCharacterBodyStyle(id);
+  if (store) await store.set('body_style', id);
 }
 
-export async function setAccessory(slot: AccessorySlot, id: string | null) {
-  currentEquipped = { ...currentEquipped, [slot]: id };
-  setEquippedAccessories(currentEquipped);
-  if (store) await store.set(`equip_${slot}`, id);
-}
+export function getFaceStyle(): string | null { return currentFaceStyle; }
+export function getBodyStyle(): string { return currentBodyStyle; }
 
 export async function setSkin(id: SkinId) {
   applySkin(id);

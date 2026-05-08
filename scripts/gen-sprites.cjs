@@ -293,6 +293,142 @@ function makeQuest() {
   return g;
 }
 
+// ── HEAD 픽셀 분리 (y=0~8) / BODY 픽셀 분리 (y=9~19) ────────────────
+const HEAD_PIXELS = IDLE_PIXELS.filter(([,y]) => y <= 8);
+const BODY_PIXELS = IDLE_PIXELS.filter(([,y]) => y >= 9);
+
+// ── HEAD state 스프라이트 ────────────────────────────────────────────
+function makeHeadIdle() {
+  const g = blank();
+  for (const [x, y, c] of HEAD_PIXELS) set(g, x, y, c);
+  return g;
+}
+
+function makeHeadAngry() {
+  const g = blank();
+  for (const [x, y, c] of HEAD_PIXELS) set(g, x, y, c);
+  // angry 표시: y=0에 빨간 점 (기존 angry.png의 (8,0) RED 픽셀)
+  set(g, 8, 0, RED);
+  return g;
+}
+
+function makeHeadDizzy() {
+  const g = blank();
+  for (const [x, y, c] of HEAD_PIXELS) set(g, x, y, c);
+  // dizzy 표시: y=0에 별 모양 노란 점 2개 (기존 dizzy.png의 (8,0)(11,0))
+  const STAR = [220, 200, 80, 255];
+  set(g, 8, 0, STAR); set(g, 11, 0, STAR);
+  // 눈 x 표시: 기존 dizzy.png의 (11,1)(12,1) 영역
+  set(g, 10, 1, STAR); set(g, 12, 1, STAR);
+  return g;
+}
+
+function makeHeadDown() {
+  // down은 head_idle과 동일 (표정 없음)
+  return makeHeadIdle();
+}
+
+function makeHeadHit() {
+  // hit도 head_idle과 동일
+  return makeHeadIdle();
+}
+
+// ── BODY style 스프라이트 ─────────────────────────────────────────────
+function makeBodyNormal() {
+  const g = blank();
+  for (const [x, y, c] of BODY_PIXELS) set(g, x, y, c);
+  return g;
+}
+
+function makeBodyQuest() {
+  // body_normal + 오른쪽 y=9~12 서류 (body 영역 내)
+  const g = blank();
+  for (const [x, y, c] of BODY_PIXELS) set(g, x, y, c);
+  const PAPER = [235, 232, 220, 255];
+  const LINE  = [100,  95,  90, 200];
+  const EDGE  = [170, 160, 140, 255];
+  for (let y = 9; y <= 13; y++) fill(g, 9, 14, y, PAPER);
+  for (let y = 9; y <= 13; y++) { set(g, 9, y, EDGE); set(g, 14, y, EDGE); }
+  fill(g, 9, 14,  9, EDGE); fill(g, 9, 14, 13, EDGE);
+  fill(g, 10, 13, 10, LINE);
+  fill(g, 10, 12, 11, LINE);
+  fill(g, 10, 13, 12, LINE);
+  // 손으로 서류 잡는 느낌
+  set(g, 14, 13, DARK);
+  return g;
+}
+
+function makeBodyTieRed() {
+  const g = blank();
+  for (const [x, y, c] of BODY_PIXELS) set(g, x, y, c);
+  const TIE = [180, 30, 30, 255];
+  const TIP = [160, 25, 25, 255];
+  // 넥타이: 몸통 대각을 따라
+  fill(g, 5,  6,  8, TIE);   // 매듭
+  fill(g, 6,  7,  9, TIE);
+  fill(g, 7,  8, 10, TIE);
+  fill(g, 8,  9, 11, TIE);
+  fill(g, 8, 10, 12, TIP);   // 팁 (삼각)
+  set(g, 9, 13, TIP);
+  return g;
+}
+
+function makeBodyTieBlue() {
+  const g = blank();
+  for (const [x, y, c] of BODY_PIXELS) set(g, x, y, c);
+  const TIE = [40, 80, 180, 255];
+  const TIP = [30, 65, 160, 255];
+  fill(g, 5,  6,  8, TIE);
+  fill(g, 6,  7,  9, TIE);
+  fill(g, 7,  8, 10, TIE);
+  fill(g, 8,  9, 11, TIE);
+  fill(g, 8, 10, 12, TIP);
+  set(g, 9, 13, TIP);
+  return g;
+}
+
+function makeBodySuitDot() {
+  // 땡땡이 양복: 어두운 양복 배경 + 흰 도트
+  const g = blank();
+  for (const [x, y, c] of BODY_PIXELS) set(g, x, y, c);
+  const SUIT = [44, 62, 80, 255];     // 어두운 양복색
+  const DOT  = [220, 220, 240, 255];  // 흰/밝은 도트
+  // 양복 배경 (몸통 오른쪽 영역 채우기)
+  for (let y = 9; y <= 14; y++) fill(g, 8, 14, y, SUIT);
+  // 땡땡이 도트
+  set(g,  9,  9, DOT); set(g, 13,  9, DOT);
+  set(g, 11, 11, DOT);
+  set(g,  9, 13, DOT); set(g, 13, 13, DOT);
+  // 왼쪽 몸통도 살짝 채우기 (기존 skin 픽셀 오른쪽)
+  fill(g, 5,  7,  9, SUIT);
+  fill(g, 6,  8, 10, SUIT);
+  fill(g, 7,  9, 11, SUIT);
+  fill(g, 8, 10, 12, SUIT);
+  // 도트 추가 (왼쪽 영역)
+  set(g, 6,  9, DOT);
+  set(g, 8, 11, DOT);
+  return g;
+}
+
+function makeBodySuitStripe() {
+  // 스트라이프 양복: 세로 줄무늬
+  const g = blank();
+  for (const [x, y, c] of BODY_PIXELS) set(g, x, y, c);
+  const DARK_S  = [44, 62, 80, 255];    // 어두운 줄
+  const LIGHT_S = [80, 105, 130, 255];  // 밝은 줄
+  // 몸통 전체에 세로 스트라이프
+  for (let y = 9; y <= 14; y++) {
+    for (let x = 5; x <= 14; x++) {
+      set(g, x, y, x % 2 === 0 ? DARK_S : LIGHT_S);
+    }
+  }
+  // 원래 팔 픽셀 복원 (스트라이프 위에 덮어쓰기)
+  for (const [x, y, c] of BODY_PIXELS) {
+    if (y >= 13) set(g, x, y, c);
+  }
+  return g;
+}
+
 // ── 생성 실행 ────────────────────────────────────────────────────────
 const OUT_DIR = path.join(__dirname, '..', 'public', 'sprites');
 
@@ -307,6 +443,19 @@ const sprites = {
   'acc_ribbon':      makeRibbon(),
   'acc_medal':       makeMedal(),
   'quest':           makeQuest(),
+  // HEAD state sprites
+  'head_idle':       makeHeadIdle(),
+  'head_angry':      makeHeadAngry(),
+  'head_dizzy':      makeHeadDizzy(),
+  'head_down':       makeHeadDown(),
+  'head_hit':        makeHeadHit(),
+  // BODY style sprites
+  'body_normal':     makeBodyNormal(),
+  'body_quest':      makeBodyQuest(),
+  'body_tie_red':    makeBodyTieRed(),
+  'body_tie_blue':   makeBodyTieBlue(),
+  'body_suit_dot':   makeBodySuitDot(),
+  'body_suit_stripe':makeBodySuitStripe(),
 };
 
 for (const [name, grid] of Object.entries(sprites)) {

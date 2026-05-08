@@ -6,7 +6,7 @@ import { loadStats, persistStats, tickDecay, getStats, onLevelUp, unlockSkill, r
 import { initBubble, showBubble } from './bubble';
 import { initGauge, updateGauge, initExpGauge, updateExpGauge } from './gauge';
 import { initInteractions } from './interactions';
-import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setAccessory, getEquippedAccessories } from './settings';
+import { initSettings, setSize, setOpacity, toggleMini, toggleDoNotDisturb, isDoNotDisturb, setNotif, isNotifSetting, resetSettings, setSoundSetting, setSkin, setFaceStyle, setBodyStyle, getFaceStyle, getBodyStyle } from './settings';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import type { SizePreset, OpacityPreset } from './settings';
 import { SKILL_LIST, syncUnlocked, checkNewUnlocks, isUnlocked as skillUnlocked } from './skills';
@@ -16,8 +16,8 @@ import { notify } from './notifications';
 import { getLastInteractionTime } from './interactions';
 import { playLevelUp } from './sounds';
 import { SKIN_LIST } from './skins';
-import { getSlotItems } from './accessories';
-import type { AccessorySlot } from './accessories';
+import { FACE_STYLES, BODY_STYLES } from './accessories';
+import { setQuestActive } from './character';
 
 const IDLE_CHATTER = [
   '(^▽^) ♪', '(＿▽＿)', '...', '(*´ҳ`*)', '(◕ω◕)',
@@ -132,7 +132,7 @@ async function main() {
     buildSkillPanel();
   });
 
-  // ── 설정 패널 ────────────────────────────────────────────
+  // ── 퀘스트 상태 표시 ─────────────────────────────────────
   function updateQuestStatus() {
     const statusEl = document.getElementById('quest-status');
     if (!statusEl) return;
@@ -155,6 +155,7 @@ async function main() {
     }
   }
 
+  // ── 설정 패널 ────────────────────────────────────────────
   const settingsBtn   = document.getElementById('settings-btn')!;
   const settingsPanel = document.getElementById('settings-panel')!;
   const questPanel    = document.getElementById('quest-panel')!;
@@ -251,7 +252,7 @@ async function main() {
   });
 
   // ── 심부름 패널 ──────────────────────────────────────────
-  buildQuestList(() => { closeAllPanels(); updateQuestStatus(); });
+  buildQuestList(() => { closeAllPanels(); updateQuestStatus(); setQuestActive(true); });
 
   document.getElementById('quest-btn')!.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -266,14 +267,14 @@ async function main() {
   document.getElementById('quest-collect-btn')!.addEventListener('click', () => {
     const exp = collectQuest();
     if (exp > 0) showBubble(`+${exp} EXP 획득!`, 2000);
+    setQuestActive(false);
     closeAllPanels();
-    updateQuestStatus();
   });
 
   document.getElementById('quest-cancel-btn')!.addEventListener('click', () => {
     cancelQuest();
+    setQuestActive(false);
     updateQuestPanel();
-    updateQuestStatus();
   });
 
   document.getElementById('quest-back-btn')!.addEventListener('click', (e) => {
@@ -301,7 +302,7 @@ async function main() {
     settingsBtn.classList.add('open');
   });
 
-  // ── 코디 패널 (스킨 + 악세서리) ─────────────────────────
+  // ── 코디 패널 (스킨 + 얼굴/몸통 스타일) ─────────────────
   function buildCoordPanel() {
     // 스킨
     const skinListEl = document.getElementById('skin-list')!;
@@ -320,46 +321,51 @@ async function main() {
       skinListEl.appendChild(item);
     });
 
-    // 악세서리 슬롯
-    (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
-      const listEl = document.getElementById(`acc-${slot}-list`)!;
-      listEl.innerHTML = '';
-
-      const noneBtn = document.createElement('button');
-      noneBtn.className = 'acc-item none-item';
-      noneBtn.dataset.slot = slot;
-      noneBtn.dataset.accId = '';
-      noneBtn.textContent = '없음';
-      noneBtn.addEventListener('click', () => equipAcc(slot, null));
-      listEl.appendChild(noneBtn);
-
-      getSlotItems(slot).forEach(acc => {
-        const btn = document.createElement('button');
-        btn.className = 'acc-item';
-        btn.dataset.slot = slot;
-        btn.dataset.accId = acc.id;
-        btn.textContent = acc.emoji;
-        btn.title = acc.name;
-        btn.addEventListener('click', () => equipAcc(slot, acc.id));
-        listEl.appendChild(btn);
-      });
+    // 얼굴 스타일
+    const faceListEl = document.getElementById('face-style-list')!;
+    faceListEl.innerHTML = '';
+    const noneBtn = document.createElement('button');
+    noneBtn.className = 'acc-item none-item';
+    noneBtn.dataset.styleKind = 'face';
+    noneBtn.dataset.styleId = '';
+    noneBtn.textContent = '없음';
+    noneBtn.addEventListener('click', async () => { await setFaceStyle(null); syncStyleButtons(); });
+    faceListEl.appendChild(noneBtn);
+    FACE_STYLES.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'acc-item';
+      btn.dataset.styleKind = 'face';
+      btn.dataset.styleId = s.id;
+      btn.textContent = s.emoji;
+      btn.title = s.name;
+      btn.addEventListener('click', async () => { await setFaceStyle(s.id); syncStyleButtons(); });
+      faceListEl.appendChild(btn);
     });
 
-    syncAccButtons();
+    // 몸통 스타일
+    const bodyListEl = document.getElementById('body-style-list')!;
+    bodyListEl.innerHTML = '';
+    BODY_STYLES.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'acc-item';
+      btn.dataset.styleKind = 'body';
+      btn.dataset.styleId = s.id;
+      btn.textContent = s.emoji;
+      btn.title = s.name;
+      btn.addEventListener('click', async () => { await setBodyStyle(s.id); syncStyleButtons(); });
+      bodyListEl.appendChild(btn);
+    });
+
+    syncStyleButtons();
   }
 
-  async function equipAcc(slot: AccessorySlot, id: string | null) {
-    await setAccessory(slot, id);
-    syncAccButtons();
-  }
-
-  function syncAccButtons() {
-    const equipped = getEquippedAccessories();
-    (['top', 'face', 'neck'] as AccessorySlot[]).forEach(slot => {
-      const currentId = equipped[slot] ?? '';
-      document.querySelectorAll<HTMLElement>(`[data-slot="${slot}"]`).forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.accId === currentId);
-      });
+  function syncStyleButtons() {
+    const face = getFaceStyle() ?? '';
+    const body = getBodyStyle();
+    document.querySelectorAll<HTMLElement>('[data-style-kind]').forEach(btn => {
+      const kind = btn.dataset.styleKind!;
+      const id = btn.dataset.styleId!;
+      btn.classList.toggle('active', kind === 'face' ? id === face : id === body);
     });
   }
 
@@ -449,20 +455,13 @@ async function main() {
     renderFrame();
 
     const state = getState();
-    if (mood <= 0) {
-      setState('down');
-    } else if (quest && mood > 30 && (state === 'idle' || state === 'angry')) {
-      setState('quest');
-    } else if (!quest && state === 'quest') {
-      setState(mood <= 30 ? 'angry' : 'idle');
-    } else if (mood <= 30 && (state === 'idle' || state === 'quest')) {
-      setState('angry');
-    } else if (mood >  30 && state === 'angry') {
-      setState('idle');
-    } else if (mood >  0  && state === 'down') {
-      setState(quest && mood > 30 ? 'quest' : mood <= 30 ? 'angry' : 'idle');
-    }
+    if (mood <= 0)                        setState('down');
+    else if (mood <= 30 && state === 'idle')  setState('angry');
+    else if (mood >  30 && state === 'angry') setState('idle');
+    else if (mood >  0  && state === 'down')  setState(mood <= 30 ? 'angry' : 'idle');
 
+    const badgeEl = document.getElementById('acc-badge');
+    if (badgeEl) badgeEl.classList.toggle('hidden', !quest);
 
     if (mood < 20 && !moodWarned) {
       moodWarned = true;
@@ -502,7 +501,6 @@ async function main() {
           }
           const questBtnEl = document.getElementById('quest-btn');
           if (questBtnEl) questBtnEl.textContent = '📋 심부름 ●';
-          updateQuestStatus();
         }
       } else if (!quest) {
         questCompleteNotified = false;
