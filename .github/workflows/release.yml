@@ -42,6 +42,11 @@ jobs:
           releaseDraft: false
           prerelease: false
 
+      - name: List bundle directory
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "src-tauri/target/release/bundle" -Recurse | Select-Object FullName
+
       - name: Generate updater manifest
         shell: pwsh
         run: |
