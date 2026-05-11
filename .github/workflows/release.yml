@@ -52,15 +52,19 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
 
-          # .sig 파일 동적 탐색
-          $sigFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*.sig" -ErrorAction SilentlyContinue | Select-Object -First 1
+          # .nsis.zip.sig 파일 탐색 (Where-Object로 다중 확장자 정확히 매칭)
+          $sigFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" |
+            Where-Object { $_.Name -match '\.nsis\.zip\.sig$' } |
+            Select-Object -First 1
           if (-not $sigFile) {
-            Write-Error "No .sig file found. Make sure TAURI_SIGNING_PRIVATE_KEY secret is set."
+            Write-Error "No .nsis.zip.sig file found. Make sure TAURI_SIGNING_PRIVATE_KEY secret is set and createUpdaterArtifacts is enabled."
             exit 1
           }
 
-          # .nsis.zip 파일 동적 탐색 (URL용)
-          $zipFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*.nsis.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
+          # .nsis.zip 파일 탐색
+          $zipFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" |
+            Where-Object { $_.Name -match '\.nsis\.zip$' } |
+            Select-Object -First 1
           if (-not $zipFile) {
             Write-Error "No .nsis.zip file found."
             exit 1
