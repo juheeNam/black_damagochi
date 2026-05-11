@@ -450,12 +450,12 @@ body {
 /* ── 미니 복귀 버튼 ── */
 #mini-restore-btn {
   display: none;
-  width: 36px;
-  height: 36px;
+  width: 52px;
+  height: 52px;
   background: rgba(240, 240, 240, 0.92);
   border: 2px solid #999;
   border-radius: 50%;
-  font-size: 16px;
+  font-size: 20px;
   color: #333;
   cursor: pointer;
   position: absolute;

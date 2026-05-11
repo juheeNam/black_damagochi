@@ -167,6 +167,6 @@ export async function toggleMini() {
   } else {
     isMinimized = true;
     document.getElementById('app')?.classList.add('minimized');
-    await win.setSize(new LogicalSize(40, 40));
+    await win.setSize(new LogicalSize(56, 56));
   }
 }
