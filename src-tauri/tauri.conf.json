@@ -14,8 +14,8 @@
     "windows": [
       {
         "title": "Black Damagochi",
-        "width": 200,
-        "height": 240,
+        "width": 280,
+        "height": 336,
         "resizable": false,
         "decorations": false,
         "transparent": true,
