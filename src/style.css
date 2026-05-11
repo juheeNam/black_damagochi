@@ -7,13 +7,13 @@ body {
   overflow: hidden;
   user-select: none;
   cursor: default;
-  width: 200px;
-  height: 240px;
+  width: 280px;
+  height: 336px;
 }
 
 #app {
-  width: 200px;
-  height: 240px;
+  width: 280px;
+  height: 336px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -27,6 +27,7 @@ body {
   display: inline-block;
   width: 80px;
   height: 80px;
+  overflow: visible;
 }
 
 #sprite {
@@ -52,7 +53,8 @@ body {
 
 .bubble {
   position: absolute;
-  top: 4px;
+  bottom: calc(100% + 6px);
+  top: auto;
   left: 50%;
   transform: translateX(-50%);
   background: white;
@@ -605,11 +607,11 @@ body {
 }
 
 #side-panel.open {
-  width: 180px;
+  width: 210px;
 }
 
 .side-content {
-  width: 180px;
+  width: 210px;
   height: 100%;
   overflow-y: auto;
   background: rgba(25, 25, 25, 0.97);

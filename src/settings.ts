@@ -10,16 +10,13 @@ import { setHeadStyle, setBodyStyle, getHeadStyle, getBodyStyle } from './charac
 export type SizePreset = 'small' | 'medium' | 'large';
 export type OpacityPreset = 'low' | 'normal' | 'high';
 
-const SIZE_MAP: Record<SizePreset, [number, number]> = {
-  small:  [140, 168],
-  medium: [200, 240],
-  large:  [280, 336],
-};
+const FIXED_W = 280;
+const FIXED_H = 336;
 const SPRITE_SIZE_MAP: Record<SizePreset, number> = { small:60, medium:80, large:110 };
 const OPACITY_MAP: Record<OpacityPreset, number>  = { low:0.4, normal:1.0, high:1.0 };
 const BUBBLE_FONT_MAP: Record<SizePreset, string>  = { small:'10px', medium:'12px', large:'14px' };
 
-export const PANEL_WIDTH = 180;
+export const PANEL_WIDTH = 210;
 
 let currentDnd = false;
 let isMinimized = false;
@@ -57,16 +54,15 @@ export async function initSettings() {
 
 async function applySize(preset: SizePreset) {
   savedSizePreset = preset;
-  const [w, h] = SIZE_MAP[preset];
   const spriteSize = SPRITE_SIZE_MAP[preset];
-  const totalW = panelOpen ? w + PANEL_WIDTH : w;
-  await getCurrentWindow().setSize(new LogicalSize(totalW, h));
+  const totalW = panelOpen ? FIXED_W + PANEL_WIDTH : FIXED_W;
+  await getCurrentWindow().setSize(new LogicalSize(totalW, FIXED_H));
   document.body.style.width  = `${totalW}px`;
-  document.body.style.height = `${h}px`;
+  document.body.style.height = `${FIXED_H}px`;
   const app = document.getElementById('app');
-  if (app) { app.style.width = `${totalW}px`; app.style.height = `${h}px`; }
+  if (app) { app.style.width = `${totalW}px`; app.style.height = `${FIXED_H}px`; }
   const petArea = document.querySelector<HTMLElement>('.pet-area');
-  if (petArea) { petArea.style.width = `${w}px`; petArea.style.height = `${h}px`; }
+  if (petArea) { petArea.style.width = `${FIXED_W}px`; petArea.style.height = `${FIXED_H}px`; }
   const sprite = document.getElementById('sprite') as HTMLCanvasElement | null;
   if (sprite) { sprite.style.width = `${spriteSize}px`; sprite.style.height = `${spriteSize}px`; }
   const wrap = sprite?.parentElement as HTMLElement | null;
@@ -142,21 +138,19 @@ export async function openSidePanel() {
   if (panelOpen) return;
   panelOpen = true;
   document.getElementById('side-panel')?.classList.add('open');
-  const [w, h] = SIZE_MAP[savedSizePreset];
-  await getCurrentWindow().setSize(new LogicalSize(w + PANEL_WIDTH, h));
-  document.body.style.width = `${w + PANEL_WIDTH}px`;
+  await getCurrentWindow().setSize(new LogicalSize(FIXED_W + PANEL_WIDTH, FIXED_H));
+  document.body.style.width = `${FIXED_W + PANEL_WIDTH}px`;
   const app = document.getElementById('app');
-  if (app) app.style.width = `${w + PANEL_WIDTH}px`;
+  if (app) app.style.width = `${FIXED_W + PANEL_WIDTH}px`;
 }
 export async function closeSidePanel() {
   if (!panelOpen) return;
   panelOpen = false;
   document.getElementById('side-panel')?.classList.remove('open');
-  const [w, h] = SIZE_MAP[savedSizePreset];
-  await getCurrentWindow().setSize(new LogicalSize(w, h));
-  document.body.style.width = `${w}px`;
+  await getCurrentWindow().setSize(new LogicalSize(FIXED_W, FIXED_H));
+  document.body.style.width = `${FIXED_W}px`;
   const app = document.getElementById('app');
-  if (app) app.style.width = `${w}px`;
+  if (app) app.style.width = `${FIXED_W}px`;
 }
 export function isSidePanelOpen() { return panelOpen; }
 
