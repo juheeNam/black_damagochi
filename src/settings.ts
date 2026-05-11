@@ -165,7 +165,17 @@ export async function toggleMini() {
     isMinimized = false;
     document.getElementById('app')?.classList.remove('minimized');
     await applySize(savedSizePreset);
+    if (panelOpen) {
+      await win.setSize(new LogicalSize(FIXED_W + PANEL_WIDTH, FIXED_H));
+      document.body.style.width = `${FIXED_W + PANEL_WIDTH}px`;
+      const app = document.getElementById('app');
+      if (app) app.style.width = `${FIXED_W + PANEL_WIDTH}px`;
+    }
   } else {
+    // await 전에 동기적으로 panelOpen 닫기
+    // → 클릭 버블링으로 호출되는 closeSidePanel()이 창 크기를 덮어쓰지 않도록
+    panelOpen = false;
+    document.getElementById('side-panel')?.classList.remove('open');
     isMinimized = true;
     document.getElementById('app')?.classList.add('minimized');
     await win.setSize(new LogicalSize(40, 40));
