@@ -46,8 +46,22 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
-          $sigPath = "src-tauri/target/release/bundle/nsis/black-damagochi_${version}_x64-setup.nsis.zip.sig"
-          $sig = (Get-Content $sigPath -Raw).Trim()
+
+          # .sig 파일 동적 탐색
+          $sigFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*.sig" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $sigFile) {
+            Write-Error "No .sig file found. Make sure TAURI_SIGNING_PRIVATE_KEY secret is set."
+            exit 1
+          }
+
+          # .nsis.zip 파일 동적 탐색 (URL용)
+          $zipFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -Filter "*.nsis.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $zipFile) {
+            Write-Error "No .nsis.zip file found."
+            exit 1
+          }
+
+          $sig = (Get-Content $sigFile.FullName -Raw).Trim()
           $pubDate = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
           $manifest = [ordered]@{
             version  = $version
@@ -56,7 +70,7 @@ jobs:
             platforms = [ordered]@{
               "windows-x86_64" = [ordered]@{
                 signature = $sig
-                url = "https://github.com/juheeNam/black_damagochi/releases/download/${{ github.ref_name }}/black-damagochi_${version}_x64-setup.nsis.zip"
+                url = "https://github.com/juheeNam/black_damagochi/releases/download/${{ github.ref_name }}/$($zipFile.Name)"
               }
             }
           }
