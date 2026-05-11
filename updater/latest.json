@@ -1,6 +1,11 @@
 {
-  "version": "0.1.0",
-  "notes": "초기 릴리즈",
-  "pub_date": "2025-01-01T00:00:00Z",
-  "platforms": {}
+  "version": "0.1.4",
+  "notes": "",
+  "pub_date": "2026-05-11T04:18:41Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRc3NicEVDempveHdhclYrWDdiRjQvcDhhK3hhRk5BejBEaGs1dDAxK3FOaTVtVXpKWnFheUQyeGlUVmlVMTNySmNBRUJpeExwa25lYkFJVGI4WE84emZpUUhSTjIvZUFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc4NDczMTE1CWZpbGU6YmxhY2stZGFtYWdvY2hpXzAuMS40X3g2NC1zZXR1cC5leGUKdnJmQm1hZjNPdTFaY2dnNGR4OGpBVXFucGduWjc5aklrRmtpeEQwRkVXai8xeW9LV0swSW51Tk83UG9uZDRFZmVlciszVnI1dmtxaXRpSEZMcVJ3Q1E9PQo=",
+      "url": "https://github.com/juheeNam/black_damagochi/releases/download/v0.1.4/black-damagochi_0.1.4_x64-setup.exe"
+    }
+  }
 }
