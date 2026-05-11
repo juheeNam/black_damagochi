@@ -79,6 +79,7 @@ function applyOpacity(preset: OpacityPreset) {
 function applyDnd(enabled: boolean) {
   currentDnd = enabled;
   document.getElementById('app')?.classList.toggle('dnd-active', enabled);
+  document.getElementById('dnd-btn')?.classList.toggle('active', enabled);
   const sprite = document.getElementById('sprite');
   if (sprite) {
     sprite.classList.toggle('dnd-mode', enabled);
