@@ -52,21 +52,21 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}".TrimStart('v')
 
-          # .nsis.zip.sig 파일 탐색 (Where-Object로 다중 확장자 정확히 매칭)
+          # NSIS .exe.sig 탐색 (Tauri v2는 .exe에 직접 서명)
           $sigFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" |
-            Where-Object { $_.Name -match '\.nsis\.zip\.sig$' } |
+            Where-Object { $_.Name -match '\.exe\.sig$' } |
             Select-Object -First 1
           if (-not $sigFile) {
-            Write-Error "No .nsis.zip.sig file found. Make sure TAURI_SIGNING_PRIVATE_KEY secret is set and createUpdaterArtifacts is enabled."
+            Write-Error "No .exe.sig file found."
             exit 1
           }
 
-          # .nsis.zip 파일 탐색
-          $zipFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" |
-            Where-Object { $_.Name -match '\.nsis\.zip$' } |
+          # NSIS .exe 탐색
+          $exeFile = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" |
+            Where-Object { $_.Name -match '\.exe$' } |
             Select-Object -First 1
-          if (-not $zipFile) {
-            Write-Error "No .nsis.zip file found."
+          if (-not $exeFile) {
+            Write-Error "No .exe file found."
             exit 1
           }
 
@@ -79,7 +79,7 @@ jobs:
             platforms = [ordered]@{
               "windows-x86_64" = [ordered]@{
                 signature = $sig
-                url = "https://github.com/juheeNam/black_damagochi/releases/download/${{ github.ref_name }}/$($zipFile.Name)"
+                url = "https://github.com/juheeNam/black_damagochi/releases/download/${{ github.ref_name }}/$($exeFile.Name)"
               }
             }
           }
