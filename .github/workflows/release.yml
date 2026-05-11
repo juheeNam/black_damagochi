@@ -32,6 +32,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: Black Damagochi ${{ github.ref_name }}
@@ -40,3 +41,31 @@ jobs:
             아래 Assets에서 `black-damagochi_x.x.x_x64-setup.exe` 파일을 다운받아 실행하세요.
           releaseDraft: false
           prerelease: false
+
+      - name: Generate updater manifest
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          $sigPath = "src-tauri/target/release/bundle/nsis/black-damagochi_${version}_x64-setup.nsis.zip.sig"
+          $sig = (Get-Content $sigPath -Raw).Trim()
+          $pubDate = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+          $manifest = [ordered]@{
+            version  = $version
+            notes    = ""
+            pub_date = $pubDate
+            platforms = [ordered]@{
+              "windows-x86_64" = [ordered]@{
+                signature = $sig
+                url = "https://github.com/juheeNam/black_damagochi/releases/download/${{ github.ref_name }}/black-damagochi_${version}_x64-setup.nsis.zip"
+              }
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content updater/latest.json -Encoding UTF8
+
+      - name: Commit updater manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updater/latest.json
+          git commit -m "chore: update updater manifest to ${{ github.ref_name }}"
+          git push origin HEAD:main
